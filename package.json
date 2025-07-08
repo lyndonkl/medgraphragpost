@@ -1,0 +1,29 @@
+{
+  "name": "medgraphrag-scrollytelling",
+  "version": "1.0.0",
+  "description": "Interactive scrollytelling experience explaining MedGraphRAG architecture",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "deploy": "npm run build && gh-pages -d dist"
+  },
+  "dependencies": {
+    "d3": "^7.9.0",
+    "scrollama": "^3.2.0"
+  },
+  "devDependencies": {
+    "vite": "^7.0.3",
+    "gh-pages": "^6.3.0"
+  },
+  "keywords": [
+    "scrollytelling",
+    "d3",
+    "scrollama",
+    "medgraphrag",
+    "data-visualization"
+  ],
+  "author": "",
+  "license": "MIT"
+} 
