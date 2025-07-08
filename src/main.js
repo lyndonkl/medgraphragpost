@@ -345,7 +345,7 @@ const createRAGViz = () => {
   const container = d3.select('#rag-viz')
   container.html('') // Clear existing content
   
-  const width = 800
+  const width = 1000
   const height = 600
   
   // Create main container
@@ -357,208 +357,376 @@ const createRAGViz = () => {
     .style('border-radius', '8px')
     .style('box-shadow', '0 2px 4px rgba(0,0,0,0.1)')
   
-  // Step 1: Show complete document
-  const documentView = mainContainer.append('div')
-    .attr('class', 'document-view')
-    .style('position', 'absolute')
-    .style('top', '20px')
-    .style('left', '20px')
-    .style('right', '20px')
-    .style('bottom', '20px')
-    .style('padding', '20px')
-    .style('background', '#f8f9fa')
-    .style('border-radius', '8px')
-    .style('border', '2px solid #e9ecef')
-  
-  // Add title
-  documentView.append('h3')
-    .style('margin', '0 0 20px 0')
-    .style('color', '#333')
-    .style('font-size', '18px')
-    .style('font-weight', '600')
-    .text(ragDocument.title)
-  
-  // Add paragraphs
-  const paragraphsContainer = documentView.append('div')
-    .attr('class', 'paragraphs')
-  
-  ragDocument.paragraphs.forEach((paragraph, index) => {
-    const p = paragraphsContainer.append('p')
-      .style('margin', '0 0 15px 0')
-      .style('line-height', '1.6')
-      .style('color', '#555')
-      .style('font-size', '14px')
-      .text(paragraph.text)
-  })
-  
-  // Step 2: Create vector space (initially hidden)
-  const vectorSpace = mainContainer.append('div')
-    .attr('class', 'vector-space')
-    .style('position', 'absolute')
-    .style('top', '20px')
-    .style('left', '20px')
-    .style('right', '20px')
-    .style('bottom', '20px')
-    .style('opacity', '0')
-    .style('pointer-events', 'none')
-  
-  // Create SVG for vector space
-  const svg = vectorSpace.append('svg')
-    .attr('width', width - 40)
-    .attr('height', height - 40)
+  // Create SVG for the entire visualization
+  const svg = mainContainer.append('svg')
+    .attr('width', width)
+    .attr('height', height)
     .style('background', 'white')
     .style('border-radius', '8px')
-    .style('border', '2px solid #e9ecef')
   
   const g = svg.append('g')
-    .attr('transform', 'translate(40, 40)')
+    .attr('transform', 'translate(20, 20)')
   
-  // Create scales
+  // Document area (left side)
+  const documentArea = g.append('g')
+    .attr('class', 'document-area')
+    .attr('transform', 'translate(0, 0)')
+  
+  // Vector space area (right side)
+  const vectorArea = g.append('g')
+    .attr('class', 'vector-area')
+    .attr('transform', `translate(${width - 400}, 0)`)
+  
+  // Document data with positions for chunks
+  const documentData = {
+    title: "Understanding Diabetes",
+    chunks: [
+      {
+        id: "chunk1",
+        text: "Diabetes is a chronic condition that affects how your body processes glucose. When you have diabetes, your pancreas either doesn't produce enough insulin or your cells don't respond properly to insulin.",
+        category: "definition",
+        // Document positions (left side)
+        docX: 50,
+        docY: 80,
+        docWidth: 300,
+        docHeight: 100,
+        // Vector space positions (right side)
+        vecX: 0.2,
+        vecY: 0.3
+      },
+      {
+        id: "chunk2", 
+        text: "The most common symptoms of diabetes include increased thirst, frequent urination, and unexplained weight loss. Some people also experience fatigue, blurred vision, and slow-healing wounds.",
+        category: "symptoms",
+        docX: 50,
+        docY: 200,
+        docWidth: 300,
+        docHeight: 100,
+        vecX: 0.25,
+        vecY: 0.35
+      },
+      {
+        id: "chunk3",
+        text: "Treatment for diabetes typically involves lifestyle changes such as diet modification and regular exercise. Many patients also require medication like insulin injections or oral medications.",
+        category: "treatment", 
+        docX: 50,
+        docY: 320,
+        docWidth: 300,
+        docHeight: 100,
+        vecX: 0.3,
+        vecY: 0.4
+      }
+    ],
+    query: {
+      text: "What are the symptoms of diabetes?",
+      category: "query",
+      docX: 50,
+      docY: 440,
+      docWidth: 300,
+      docHeight: 40,
+      vecX: 0.24,
+      vecY: 0.34
+    }
+  }
+  
+  // Color scheme
+  const categoryColors = {
+    definition: '#d32f2f',
+    symptoms: '#1976d2',
+    treatment: '#388e3c',
+    query: '#ff9800'
+  }
+  
+  // Function to wrap text for SVG
+  const wrapText = (text, width, lineHeight = 16) => {
+    const words = text.split(' ')
+    const lines = []
+    let currentLine = words[0]
+    
+    for (let i = 1; i < words.length; i++) {
+      const word = words[i]
+      const testLine = currentLine + ' ' + word
+      // More accurate character width estimation (average 6.5px per character for 12px font)
+      const testWidth = testLine.length * 6.5
+      
+      if (testWidth > width - 20) { // 20px padding
+        lines.push(currentLine)
+        currentLine = word
+      } else {
+        currentLine = testLine
+      }
+    }
+    lines.push(currentLine)
+    
+    return lines
+  }
+  
+  // Scales for vector space
   const xScale = d3.scaleLinear()
     .domain([0, 1])
-    .range([0, width - 120])
+    .range([0, 350])
   
   const yScale = d3.scaleLinear()
     .domain([0, 1])
-    .range([height - 120, 0])
+    .range([350, 0])
+  
+  // Step 1: Show document with title
+  const title = documentArea.append('text')
+    .attr('x', 0)
+    .attr('y', 30)
+    .style('font-size', '18px')
+    .style('font-weight', '600')
+    .style('fill', '#333')
+    .style('opacity', 0)
+    .text(documentData.title)
+  
+  // Step 2: Show document chunks with dashed rounded boxes
+  const chunkGroups = documentArea.selectAll('.chunk-group')
+    .data(documentData.chunks)
+    .enter()
+    .append('g')
+    .attr('class', 'chunk-group')
+    .attr('transform', d => `translate(${d.docX}, ${d.docY})`)
+    .style('opacity', 0)
+  
+  // Add dashed rounded rectangles around chunks
+  chunkGroups.append('rect')
+    .attr('width', d => d.docWidth)
+    .attr('height', d => d.docHeight)
+    .attr('rx', 8)
+    .attr('ry', 8)
+    .attr('fill', 'none')
+    .attr('stroke', d => categoryColors[d.category])
+    .attr('stroke-width', 2)
+    .attr('stroke-dasharray', '5,5')
+    .attr('opacity', 0.8)
+  
+  // Add chunk text
+  // Add wrapped text lines
+  chunkGroups.each(function(d) {
+    const lines = wrapText(d.text, d.docWidth)
+    const textGroup = d3.select(this)
+    
+    lines.forEach((line, i) => {
+      textGroup.append('text')
+        .attr('x', 10)
+        .attr('y', 20 + (i * 16))
+        .style('font-size', '12px')
+        .style('fill', '#555')
+        .style('pointer-events', 'none')
+        .text(line)
+    })
+  })
+  
+  // Add chunk labels
+  chunkGroups.append('text')
+    .attr('x', d => d.docWidth - 10)
+    .attr('y', 15)
+    .attr('text-anchor', 'end')
+    .style('font-size', '10px')
+    .style('font-weight', '600')
+    .style('fill', d => categoryColors[d.category])
+    .style('pointer-events', 'none')
+    .text(d => d.category.toUpperCase())
+  
+  // Step 3: Show query with dashed box
+  const queryGroup = documentArea.append('g')
+    .attr('class', 'query-group')
+    .attr('transform', `translate(${documentData.query.docX}, ${documentData.query.docY})`)
+    .style('opacity', 0)
+  
+  queryGroup.append('rect')
+    .attr('width', documentData.query.docWidth)
+    .attr('height', documentData.query.docHeight)
+    .attr('rx', 8)
+    .attr('ry', 8)
+    .attr('fill', 'none')
+    .attr('stroke', categoryColors.query)
+    .attr('stroke-width', 2)
+    .attr('stroke-dasharray', '5,5')
+    .attr('opacity', 0.8)
+  
+  queryGroup.append('text')
+    .attr('x', 10)
+    .attr('y', 25)
+    .style('font-size', '12px')
+    .style('fill', '#555')
+    .style('pointer-events', 'none')
+    .text(documentData.query.text)
+  
+  queryGroup.append('text')
+    .attr('x', documentData.query.docWidth - 10)
+    .attr('y', 15)
+    .attr('text-anchor', 'end')
+    .style('font-size', '10px')
+    .style('font-weight', '600')
+    .style('fill', categoryColors.query)
+    .style('pointer-events', 'none')
+    .text('QUERY')
+  
+  // Step 4: Create vector space background
+  const vectorBackground = vectorArea.append('rect')
+    .attr('width', 350)
+    .attr('height', 350)
+    .attr('fill', '#f8f9fa')
+    .attr('stroke', '#e9ecef')
+    .attr('stroke-width', 2)
+    .attr('rx', 8)
+    .attr('ry', 8)
+  
+  // Add vector space title
+  vectorArea.append('text')
+    .attr('x', 175)
+    .attr('y', 25)
+    .attr('text-anchor', 'middle')
+    .style('font-size', '14px')
+    .style('font-weight', '600')
+    .style('fill', '#333')
+    .text('Vector Space')
   
   // Add axes
   const xAxis = d3.axisBottom(xScale).ticks(5)
   const yAxis = d3.axisLeft(yScale).ticks(5)
   
-  g.append('g')
+  vectorArea.append('g')
     .attr('class', 'x-axis')
-    .attr('transform', `translate(0,${height - 120})`)
+    .attr('transform', 'translate(0, 350)')
     .call(xAxis)
   
-  g.append('g')
+  vectorArea.append('g')
     .attr('class', 'y-axis')
     .call(yAxis)
   
-  // Add title for vector space
-  g.append('text')
-    .attr('class', 'title')
-    .attr('text-anchor', 'middle')
-    .attr('x', (width - 120) / 2)
-    .attr('y', -10)
-    .style('font-size', '16px')
-    .style('font-weight', '600')
-    .text('Document Chunks in Vector Space')
-  
-  // Color scheme for categories
-  const categoryColors = {
-    definition: '#d32f2f',
-    symptoms: '#1976d2', 
-    treatment: '#388e3c',
-    query: '#ff9800'
-  }
-  
-  // Create document chunks (initially hidden)
-  const chunks = g.selectAll('.chunk')
-    .data(ragDocument.paragraphs)
+  // Step 5: Create vector space circles (initially hidden)
+  const vectorCircles = vectorArea.selectAll('.vector-circle')
+    .data(documentData.chunks)
     .enter()
     .append('g')
-    .attr('class', 'chunk')
-    .style('opacity', '0')
-    .style('cursor', 'pointer')
+    .attr('class', 'vector-circle')
+    .style('opacity', 0)
   
-  // Add circles for chunks
-  chunks.append('circle')
-    .attr('cx', d => xScale(d.x))
-    .attr('cy', d => yScale(d.y))
+  vectorCircles.append('circle')
+    .attr('cx', d => xScale(d.vecX))
+    .attr('cy', d => yScale(d.vecY))
     .attr('r', 8)
     .attr('fill', d => categoryColors[d.category])
     .attr('stroke', '#333')
     .attr('stroke-width', 2)
   
-  // Add labels for chunks
-  chunks.append('text')
-    .attr('x', d => xScale(d.x) + 15)
-    .attr('y', d => yScale(d.y))
+  vectorCircles.append('text')
+    .attr('x', d => xScale(d.vecX) + 15)
+    .attr('y', d => yScale(d.vecY))
     .attr('dy', '0.35em')
-    .style('font-size', '11px')
+    .style('font-size', '10px')
     .style('font-weight', '500')
     .style('fill', '#333')
     .style('pointer-events', 'none')
-    .text(d => `Chunk ${d.id}`)
+    .text(d => d.category)
   
-  // Create query point (initially hidden)
-  const queryGroup = g.append('g')
-    .attr('class', 'query')
-    .style('opacity', '0')
+  // Step 6: Create query vector (initially hidden)
+  const queryVector = vectorArea.append('g')
+    .attr('class', 'query-vector')
+    .style('opacity', 0)
   
-  // Add query marker (star shape)
+  // Star shape for query
   const starPoints = "0,8 2,2 8,2 3,-2 5,-8 0,-4 -5,-8 -3,-2 -8,2 -2,2"
   
-  queryGroup.append('polygon')
+  queryVector.append('polygon')
     .attr('points', starPoints)
     .attr('fill', categoryColors.query)
     .attr('stroke', '#333')
     .attr('stroke-width', 2)
-    .attr('transform', `translate(${xScale(ragDocument.query.x)}, ${yScale(ragDocument.query.y)})`)
+    .attr('transform', `translate(${xScale(documentData.query.vecX)}, ${yScale(documentData.query.vecY)})`)
   
-  // Add query label
-  queryGroup.append('text')
-    .attr('x', xScale(ragDocument.query.x) + 20)
-    .attr('y', yScale(ragDocument.query.y))
+  queryVector.append('text')
+    .attr('x', xScale(documentData.query.vecX) + 20)
+    .attr('y', yScale(documentData.query.vecY))
     .attr('dy', '0.35em')
-    .style('font-size', '11px')
+    .style('font-size', '10px')
     .style('font-weight', '500')
     .style('fill', '#333')
     .style('pointer-events', 'none')
     .text('Query')
   
-  // Add retrieval line (initially hidden)
-  const retrievalLine = g.append('line')
+  // Step 7: Create retrieval line (initially hidden)
+  const retrievalLine = vectorArea.append('line')
     .attr('class', 'retrieval-line')
-    .attr('x1', xScale(ragDocument.query.x))
-    .attr('y1', yScale(ragDocument.query.y))
-    .attr('x2', xScale(ragDocument.paragraphs[1].x)) // Connect to symptoms paragraph
-    .attr('y2', yScale(ragDocument.paragraphs[1].y))
+    .attr('x1', xScale(documentData.query.vecX))
+    .attr('y1', yScale(documentData.query.vecY))
+    .attr('x2', xScale(documentData.chunks[1].vecX)) // Connect to symptoms chunk
+    .attr('y2', yScale(documentData.chunks[1].vecY))
     .attr('stroke', '#ff5722')
     .attr('stroke-width', 3)
     .attr('stroke-dasharray', '5,5')
-    .style('opacity', '0')
+    .style('opacity', 0)
   
   // Animation sequence
   let currentStep = 0
+  const totalSteps = 6
   
   const animateStep = () => {
     switch(currentStep) {
       case 0:
-        // Show document
-        documentView.style('opacity', '1')
+        // Show document title and chunks
+        title.transition().duration(500).style('opacity', 1)
+        chunkGroups.transition().duration(500).style('opacity', 1)
         break
         
       case 1:
-        // Fade out document, show vector space
-        documentView.style('opacity', '0')
-        vectorSpace.style('opacity', '1')
-        vectorSpace.style('pointer-events', 'auto')
+        // Show query
+        queryGroup.transition().duration(500).style('opacity', 1)
         break
         
       case 2:
-        // Show document chunks
-        chunks.transition()
+        // Animate chunks moving to vector space
+        chunkGroups.transition()
+          .duration(1500)
+          .ease(d3.easeCubicOut)
+          .attr('transform', d => `translate(${width - 400 + xScale(d.vecX)}, ${yScale(d.vecY)}) scale(0.3)`)
+          .style('opacity', 0.2)
+        
+        // Show vector circles
+        vectorCircles.transition()
           .duration(1000)
-          .style('opacity', '1')
+          .delay(1500)
+          .ease(d3.easeBackOut)
+          .style('opacity', 1)
+          .attr('transform', 'scale(0)')
+          .transition()
+          .duration(300)
+          .attr('transform', 'scale(1)')
         break
         
       case 3:
-        // Show query
+        // Animate query moving to vector space
         queryGroup.transition()
+          .duration(1500)
+          .ease(d3.easeCubicOut)
+          .attr('transform', `translate(${width - 400 + xScale(documentData.query.vecX)}, ${yScale(documentData.query.vecY)}) scale(0.3)`)
+          .style('opacity', 0.2)
+        
+        // Show query vector
+        queryVector.transition()
           .duration(1000)
-          .style('opacity', '1')
+          .delay(1500)
+          .ease(d3.easeBackOut)
+          .style('opacity', 1)
+          .attr('transform', 'scale(0)')
+          .transition()
+          .duration(300)
+          .attr('transform', 'scale(1)')
         break
         
       case 4:
         // Show retrieval line
         retrievalLine.transition()
           .duration(1000)
-          .style('opacity', '1')
+          .style('opacity', 1)
+        break
         
+      case 5:
         // Highlight the retrieved chunk
-        chunks.select('circle')
+        vectorCircles.select('circle')
           .transition()
           .duration(500)
           .attr('r', 12)
@@ -567,46 +735,66 @@ const createRAGViz = () => {
     }
   }
   
-  // Add step controls
-  const controls = mainContainer.append('div')
+  // Auto-advance animation
+  const autoAdvance = () => {
+    if (currentStep < totalSteps - 1) {
+      currentStep++
+      animateStep()
+      setTimeout(autoAdvance, 2500) // Wait 2.5 seconds between steps
+    }
+  }
+  
+  // Start animation sequence
+  setTimeout(() => {
+    animateStep()
+    setTimeout(autoAdvance, 1500)
+  }, 1000)
+  
+  // Add restart button
+  const restartButton = mainContainer.append('button')
     .style('position', 'absolute')
     .style('bottom', '20px')
-    .style('left', '50%')
-    .style('transform', 'translateX(-50%)')
-    .style('display', 'flex')
-    .style('gap', '10px')
-  
-  const stepLabels = [
-    'Show Document',
-    'Split into Chunks', 
-    'Embed in Vector Space',
-    'Add Query',
-    'Show Retrieval'
-  ]
-  
-  stepLabels.forEach((label, index) => {
-    controls.append('button')
-      .style('padding', '8px 16px')
-      .style('background', index === currentStep ? '#1976d2' : '#e0e0e0')
-      .style('color', index === currentStep ? 'white' : '#333')
-      .style('border', 'none')
-      .style('border-radius', '4px')
-      .style('cursor', 'pointer')
-      .style('font-size', '12px')
-      .text(label)
-      .on('click', () => {
-        currentStep = index
+    .style('right', '20px')
+    .style('padding', '8px 16px')
+    .style('background', '#1976d2')
+    .style('color', 'white')
+    .style('border', 'none')
+    .style('border-radius', '4px')
+    .style('cursor', 'pointer')
+    .style('font-size', '12px')
+    .text('Restart Animation')
+    .on('click', () => {
+      // Reset all elements
+      currentStep = 0
+      
+      // Reset document elements
+      title.style('opacity', 0)
+      chunkGroups.style('opacity', 0)
+        .attr('transform', d => `translate(${d.docX}, ${d.docY})`)
+      
+      // Reset query
+      queryGroup.style('opacity', 0)
+        .attr('transform', `translate(${documentData.query.docX}, ${documentData.query.docY})`)
+      
+      // Reset vector elements
+      vectorCircles.style('opacity', 0)
+      queryVector.style('opacity', 0)
+      retrievalLine.style('opacity', 0)
+      
+      // Reset circle sizes
+      vectorCircles.select('circle')
+        .attr('r', 8)
+        .attr('stroke-width', 2)
+      
+      // Restart animation
+      setTimeout(() => {
         animateStep()
-        
-        // Update button styles
-        controls.selectAll('button')
-          .style('background', (d, i) => i === currentStep ? '#1976d2' : '#e0e0e0')
-          .style('color', (d, i) => i === currentStep ? 'white' : '#333')
-      })
-  })
+        setTimeout(autoAdvance, 1500)
+      }, 1000)
+    })
   
-  // Add tooltips for chunks
-  chunks.on('mouseover', function(event, d) {
+  // Add tooltips for vector circles
+  vectorCircles.on('mouseover', function(event, d) {
     const tooltip = d3.select('body').append('div')
       .attr('class', 'tooltip')
       .style('position', 'absolute')
@@ -620,8 +808,7 @@ const createRAGViz = () => {
       .style('max-width', '300px')
     
     tooltip.html(`
-      <strong>${d.id.toUpperCase()}</strong><br>
-      Category: ${d.category}<br>
+      <strong>${d.category.toUpperCase()}</strong><br>
       ${d.text.substring(0, 100)}...
     `)
     
@@ -632,9 +819,6 @@ const createRAGViz = () => {
   .on('mouseout', () => {
     d3.selectAll('.tooltip').remove()
   })
-  
-  // Initialize first step
-  animateStep()
 }
 
 // Initialize visualizations when sections come into view
