@@ -68,9 +68,83 @@
         <section id="limitations" class="step">
             <div class="content">
                 <h2>Limitations of Traditional RAG</h2>
-                <p>Why simple vector search isn't enough for complex medical queries</p>
+                <p>Why simple vector search falls short for complex medical queries</p>
             </div>
-            <div class="visualization" id="limitations-viz"></div>
+        </section>
+
+        <!-- Complex Query Understanding -->
+        <section id="complex-queries" class="step">
+            <div class="content">
+                <h2>Complex Query Understanding</h2>
+                <div class="explanation-text">
+                    <p>Traditional RAG struggles with multi-step reasoning questions that require connecting multiple pieces of information.</p>
+                    <p><strong>Example:</strong> "What are the long-term complications of diabetes in patients who don't respond well to insulin therapy?"</p>
+                    <p>This query requires understanding:</p>
+                    <ul>
+                        <li>What diabetes complications exist</li>
+                        <li>Which patients don't respond to insulin</li>
+                        <li>How these two factors interact</li>
+                        <li>The temporal aspect of "long-term"</li>
+                    </ul>
+                    <p>Simple vector similarity might retrieve chunks about diabetes complications OR insulin resistance, but fails to connect these concepts or understand the conditional relationship.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Distributed Knowledge -->
+        <section id="distributed-knowledge" class="step">
+            <div class="content">
+                <h2>Distributed Domain Knowledge</h2>
+                <div class="explanation-text">
+                    <p>Medical information is often scattered across multiple documents, requiring the system to understand relationships between concepts that appear in different contexts.</p>
+                    <p><strong>Example:</strong> Understanding drug interactions requires connecting information from:</p>
+                    <ul>
+                        <li>Individual drug monographs</li>
+                        <li>Clinical trial reports</li>
+                        <li>Case studies</li>
+                        <li>Pharmacokinetic databases</li>
+                    </ul>
+                    <p>A query about "warfarin and vitamin K interactions" might find relevant chunks in separate documents about anticoagulants, nutrition, and drug metabolism, but traditional RAG cannot establish the causal relationships between these isolated pieces of information.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Context Window Limitations -->
+        <section id="context-limitations" class="step">
+            <div class="content">
+                <h2>Fixed Context Window Constraints</h2>
+                <div class="explanation-text">
+                    <p>LLMs have limited "short-term memory" - their context window can only hold so much information at once. Traditional RAG often fills this precious space with irrelevant or redundant content.</p>
+                    <p><strong>Example:</strong> When answering "What's the recommended dosage for metformin in elderly patients with kidney disease?"</p>
+                    <p>Vector search might retrieve:</p>
+                    <ul>
+                        <li>General metformin information (relevant)</li>
+                        <li>Dosage guidelines for healthy adults (partially relevant)</li>
+                        <li>Kidney disease treatment protocols (relevant)</li>
+                        <li>Diabetes management overview (redundant)</li>
+                        <li>Metformin side effects in young patients (irrelevant)</li>
+                    </ul>
+                    <p>This wastes context space on information that doesn't directly answer the specific question, reducing the model's ability to focus on the most relevant details.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Efficiency and Scalability -->
+        <section id="efficiency-scalability" class="step">
+            <div class="content">
+                <h2>Efficiency and Scalability Issues</h2>
+                <div class="explanation-text">
+                    <p>Flat vector stores require searching through the entire document collection for every query, which becomes computationally expensive and slow as the knowledge base grows.</p>
+                    <p><strong>Example:</strong> In a medical knowledge base with 100,000 documents:</p>
+                    <ul>
+                        <li>Every query must compute similarity with all 100,000 document chunks</li>
+                        <li>No intelligent filtering or hierarchical organization</li>
+                        <li>Search time grows linearly with database size</li>
+                        <li>Cannot leverage domain-specific knowledge to narrow search scope</li>
+                    </ul>
+                    <p>This brute-force approach becomes impractical for real-time medical applications where speed and accuracy are critical for patient care decisions.</p>
+                </div>
+            </div>
         </section>
 
         <!-- Knowledge Graphs Section -->
