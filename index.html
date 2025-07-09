@@ -628,6 +628,7 @@
                         <span class="dot active" data-slide="0"></span>
                         <span class="dot" data-slide="1"></span>
                         <span class="dot" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
                     </div>
                     <button class="nav-btn next-btn" onclick="changeSlide('knowledge-graphs-intro', 1)">→</button>
                 </div>
@@ -639,10 +640,19 @@
             <div class="content">
                 <h2>Knowledge Graphs</h2>
                 <div class="slide-content">
-                    <h3>Why Knowledge Graphs Matter for Medical AI</h3>
-                    <p><strong>Complex Reasoning:</strong> Medical questions often require connecting multiple pieces of information across different domains. For example, understanding drug interactions requires knowledge about pharmacology, patient conditions, and treatment protocols.</p>
-                    <p><strong>Contextual Understanding:</strong> Knowledge graphs preserve the context and relationships between medical concepts, allowing AI systems to understand the "why" behind medical decisions, not just the "what."</p>
-                    <p><strong>Discoverability:</strong> By explicitly modeling relationships, knowledge graphs can reveal hidden connections and suggest relevant information that might not be directly mentioned in a query.</p>
+                    <h3>What is GraphRAG?</h3>
+                    <p>GraphRAG is RAG supercharged by knowledge graphs. Instead of retrieving isolated text chunks, it retrieves interconnected information that enables deeper understanding and reasoning.</p>
+                    
+                    <h4>How GraphRAG Works</h4>
+                    <p><strong>Interconnected Retrieval:</strong> When you ask "What are the side effects of metformin for diabetic patients with kidney disease?", GraphRAG doesn't just find separate chunks about metformin, diabetes, and kidney disease. It follows the connections between these concepts to provide a complete picture.</p>
+                    
+                    <p><strong>Example Query Path:</strong></p>
+                    <ul>
+                        <li>Find: Metformin → treats → Diabetes</li>
+                        <li>Find: Metformin → contraindicated in → Kidney Disease</li>
+                        <li>Find: Diabetes → complicates → Kidney Disease</li>
+                        <li>Result: Comprehensive understanding of the patient's situation</li>
+                    </ul>
                 </div>
                 <div class="slide-navigation">
                     <button class="nav-btn prev-btn" onclick="changeSlide('knowledge-graphs-intro', -1)">←</button>
@@ -650,6 +660,7 @@
                         <span class="dot" data-slide="0"></span>
                         <span class="dot active" data-slide="1"></span>
                         <span class="dot" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
                     </div>
                     <button class="nav-btn next-btn" onclick="changeSlide('knowledge-graphs-intro', 1)">→</button>
                 </div>
@@ -661,16 +672,16 @@
             <div class="content">
                 <h2>Knowledge Graphs</h2>
                 <div class="slide-content">
-                    <h3>Medical Knowledge Graph Example</h3>
-                    <p>Consider a patient with diabetes asking about metformin side effects. A knowledge graph would connect:</p>
-                    <ul>
-                        <li><strong>Patient</strong> → <strong>has condition</strong> → <strong>Diabetes</strong></li>
-                        <li><strong>Metformin</strong> → <strong>treats</strong> → <strong>Diabetes</strong></li>
-                        <li><strong>Metformin</strong> → <strong>has side effect</strong> → <strong>Gastrointestinal upset</strong></li>
-                        <li><strong>Metformin</strong> → <strong>contraindicated in</strong> → <strong>Severe kidney disease</strong></li>
-                        <li><strong>Patient</strong> → <strong>should monitor</strong> → <strong>Kidney function</strong></li>
-                    </ul>
-                    <p>This interconnected structure allows the system to provide comprehensive, contextually relevant answers that consider the patient's specific situation.</p>
+                    <h3>Enhanced Knowledge Representation & Context</h3>
+                    <p>Knowledge graphs capture complex relationships, not just keywords, directly addressing traditional RAG's weak points.</p>
+                    
+                    <h4>Complex Query Understanding</h4>
+                    <p><strong>Traditional RAG Problem:</strong> "What drug interactions should I worry about for a diabetic patient on metformin with kidney disease?" might retrieve separate chunks about metformin, diabetes, and kidney disease, but miss the crucial connection that metformin is contraindicated in severe kidney disease.</p>
+                    
+                    <p><strong>GraphRAG Solution:</strong> The knowledge graph explicitly connects these concepts, ensuring the system understands that kidney disease affects metformin safety, not just that both conditions exist separately.</p>
+                    
+                    <h4>Distributed Knowledge</h4>
+                    <p><strong>Example:</strong> Information about drug interactions might be scattered across multiple documents. GraphRAG can traverse connections to find that metformin + kidney disease = risk, even if this specific combination isn't mentioned in a single document.</p>
                 </div>
                 <div class="slide-navigation">
                     <button class="nav-btn prev-btn" onclick="changeSlide('knowledge-graphs-intro', -1)">←</button>
@@ -678,6 +689,44 @@
                         <span class="dot" data-slide="0"></span>
                         <span class="dot" data-slide="1"></span>
                         <span class="dot active" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('knowledge-graphs-intro', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Knowledge Graphs Introduction - Slide 4 -->
+        <section id="knowledge-graphs-intro-4" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Knowledge Graphs</h2>
+                <div class="slide-content">
+                    <h3>Improved Reasoning & Efficiency</h3>
+                    <p>GraphRAG enables multi-hop logic and focused retrieval, solving traditional RAG's reasoning and efficiency problems.</p>
+                    
+                    <h4>Multi-Hop Reasoning</h4>
+                    <p><strong>Example Query:</strong> "What monitoring is needed for a diabetic patient starting metformin?"</p>
+                    <p><strong>GraphRAG Path:</strong></p>
+                    <ul>
+                        <li>Diabetes → requires → Blood Tests</li>
+                        <li>Metformin → contraindicated in → Kidney Disease</li>
+                        <li>Therefore: Monitor kidney function before starting metformin</li>
+                    </ul>
+                    
+                    <h4>Focused Retrieval</h4>
+                    <p><strong>Traditional RAG:</strong> Might retrieve 20 chunks about diabetes, metformin, and kidney disease, overwhelming the LLM's context window.</p>
+                    <p><strong>GraphRAG:</strong> Follows specific paths to retrieve only the 3-5 most relevant interconnected pieces of information.</p>
+                    
+                    <h4>Interpretability</h4>
+                    <p>The reasoning path can be visualized: "We checked kidney function because metformin is contraindicated in kidney disease, and diabetes can cause kidney disease." This makes the AI's decision-making process transparent and understandable.</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('knowledge-graphs-intro', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot active" data-slide="3"></span>
                     </div>
                     <button class="nav-btn next-btn" onclick="changeSlide('knowledge-graphs-intro', 1)">→</button>
                 </div>

@@ -1429,7 +1429,7 @@ const slideCounts = {
   'advanced-retrieval': 3,
   'contextual-refinements': 4,
   'external-tools': 5,
-  'knowledge-graphs-intro': 3
+  'knowledge-graphs-intro': 4
 }
 
 function changeSlide(sectionName, direction) {
