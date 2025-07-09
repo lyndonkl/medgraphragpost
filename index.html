@@ -147,6 +147,468 @@
             </div>
         </section>
 
+        <!-- Advanced RAG Solutions -->
+        <section id="advanced-rag" class="step">
+            <div class="content">
+                <h2>Advanced RAG Solutions</h2>
+                <p>How modern systems overcome traditional RAG limitations</p>
+            </div>
+        </section>
+
+        <!-- Smarter Chunking & Indexing - Slide 1 -->
+        <section id="smarter-chunking-1" class="step slide-section">
+            <div class="content">
+                <h2>Smarter Chunking & Indexing</h2>
+                <div class="slide-content">
+                    <h3>Recursive Splits</h3>
+                    <p>Instead of fixed-size chunks, documents are split intelligently based on semantic boundaries and then further subdivided when needed.</p>
+                    <p><strong>Example:</strong> A medical research paper might be split into:</p>
+                    <ul>
+                        <li>Abstract (high-level summary)</li>
+                        <li>Introduction (background context)</li>
+                        <li>Methods (procedural details)</li>
+                        <li>Results (findings and data)</li>
+                        <li>Discussion (interpretation and implications)</li>
+                    </ul>
+                    <p>Each section can be further split into paragraphs or sentences based on topic shifts.</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('smarter-chunking', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot active" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('smarter-chunking', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Smarter Chunking & Indexing - Slide 2 -->
+        <section id="smarter-chunking-2" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Smarter Chunking & Indexing</h2>
+                <div class="slide-content">
+                    <h3>Small-to-Big Retrieval</h3>
+                    <p>Start with small, specific chunks and expand to larger context when needed for comprehensive understanding.</p>
+                    <p><strong>Example:</strong> For "diabetes medication side effects":</p>
+                    <ul>
+                        <li>First retrieve: specific side effect descriptions</li>
+                        <li>Then expand to: dosage guidelines and monitoring protocols</li>
+                        <li>Finally include: patient case studies and clinical recommendations</li>
+                    </ul>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('smarter-chunking', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot active" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('smarter-chunking', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Smarter Chunking & Indexing - Slide 3 -->
+        <section id="smarter-chunking-3" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Smarter Chunking & Indexing</h2>
+                <div class="slide-content">
+                    <h3>Metadata Tagging</h3>
+                    <p>Enrich chunks with structured metadata to enable more precise retrieval.</p>
+                    <p><strong>Example:</strong> A chunk about insulin therapy might be tagged with:</p>
+                    <ul>
+                        <li>Topic: "diabetes treatment"</li>
+                        <li>Drug: "insulin"</li>
+                        <li>Population: "elderly patients"</li>
+                        <li>Evidence level: "clinical trial"</li>
+                        <li>Publication date: "2023"</li>
+                    </ul>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('smarter-chunking', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot active" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('smarter-chunking', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Smarter Chunking & Indexing - Slide 4 -->
+        <section id="smarter-chunking-4" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Smarter Chunking & Indexing</h2>
+                <div class="slide-content">
+                    <h3>Hierarchical Summaries</h3>
+                    <p>Create multi-level summaries that allow quick navigation from overview to details.</p>
+                    <p><strong>Example:</strong> A diabetes management document might have:</p>
+                    <ul>
+                        <li>Level 1: "Diabetes requires lifestyle changes and medication"</li>
+                        <li>Level 2: "Medication options include insulin and oral agents"</li>
+                        <li>Level 3: "Insulin types: rapid-acting, long-acting, mixed"</li>
+                        <li>Level 4: Detailed dosing protocols for each type</li>
+                    </ul>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('smarter-chunking', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot active" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('smarter-chunking', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Advanced Retrieval Strategies - Slide 1 -->
+        <section id="advanced-retrieval-1" class="step slide-section">
+            <div class="content">
+                <h2>Advanced Retrieval Strategies</h2>
+                <div class="slide-content">
+                    <h3>Query Expansion</h3>
+                    <p>Rephrase and expand the original query to capture related concepts and terminology.</p>
+                    <p><strong>Example:</strong> Original query: "heart attack symptoms"</p>
+                    <p>Expanded to include:</p>
+                    <ul>
+                        <li>"myocardial infarction signs"</li>
+                        <li>"chest pain and cardiac events"</li>
+                        <li>"acute coronary syndrome symptoms"</li>
+                        <li>"cardiac emergency warning signs"</li>
+                    </ul>
+                    <p>This captures medical terminology variations and related concepts that might not appear in the original query.</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('advanced-retrieval', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot active" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('advanced-retrieval', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Advanced Retrieval Strategies - Slide 2 -->
+        <section id="advanced-retrieval-2" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Advanced Retrieval Strategies</h2>
+                <div class="slide-content">
+                    <h3>Re-ranking Retrieved Results</h3>
+                    <p>Use more sophisticated algorithms to reorder initial retrieval results based on relevance, recency, and authority.</p>
+                    <p><strong>Example:</strong> For "COVID-19 treatment guidelines":</p>
+                    <ul>
+                        <li>Initial retrieval: 20 chunks about COVID-19</li>
+                        <li>Re-ranking factors:</li>
+                        <ul>
+                            <li>Publication date (prefer recent guidelines)</li>
+                            <li>Source authority (CDC, WHO, major medical journals)</li>
+                            <li>Specificity to treatment (not just general COVID info)</li>
+                            <li>Evidence quality (clinical trials vs. case reports)</li>
+                        </ul>
+                        <li>Final selection: 5 most relevant, authoritative chunks</li>
+                    </ul>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('advanced-retrieval', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot active" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('advanced-retrieval', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Advanced Retrieval Strategies - Slide 3 -->
+        <section id="advanced-retrieval-3" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Advanced Retrieval Strategies</h2>
+                <div class="slide-content">
+                    <h3>Multi-Vector Retrieval</h3>
+                    <p>Use different embedding models for different aspects of the query.</p>
+                    <p><strong>Example:</strong> For "diabetes complications in elderly patients":</p>
+                    <ul>
+                        <li>Clinical embeddings: for medical terminology</li>
+                        <li>Demographic embeddings: for age-related factors</li>
+                        <li>Temporal embeddings: for progression and long-term effects</li>
+                        <li>Combine results for comprehensive coverage</li>
+                    </ul>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('advanced-retrieval', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot active" data-slide="2"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('advanced-retrieval', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contextual Refinements - Slide 1 -->
+        <section id="contextual-refinements-1" class="step slide-section">
+            <div class="content">
+                <h2>Contextual Refinements</h2>
+                <div class="slide-content">
+                    <h3>Filtering Irrelevant Chunks</h3>
+                    <p>Remove or downweight information that doesn't directly contribute to answering the query.</p>
+                    <p><strong>Example:</strong> For "metformin dosage in kidney disease":</p>
+                    <ul>
+                        <li>Keep: dosage guidelines, kidney function considerations, monitoring protocols</li>
+                        <li>Filter out: general diabetes overview, metformin history, unrelated side effects</li>
+                        <li>Result: Focused context that directly addresses the specific question</li>
+                    </ul>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('contextual-refinements', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot active" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('contextual-refinements', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contextual Refinements - Slide 2 -->
+        <section id="contextual-refinements-2" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Contextual Refinements</h2>
+                <div class="slide-content">
+                    <h3>Information Compression</h3>
+                    <p>Condense retrieved information while preserving essential details.</p>
+                    <p><strong>Example:</strong> Original chunk: "Metformin is typically started at 500mg twice daily with meals, and can be titrated up to 2550mg daily in divided doses. In patients with reduced kidney function (eGFR &lt; 30), metformin should be avoided due to risk of lactic acidosis."</p>
+                    <p>Compressed to: "Metformin: 500mg bid, max 2550mg/day. Avoid if eGFR &lt; 30."</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('contextual-refinements', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot active" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('contextual-refinements', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contextual Refinements - Slide 3 -->
+        <section id="contextual-refinements-3" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Contextual Refinements</h2>
+                <div class="slide-content">
+                    <h3>Self-Critique by the LLM</h3>
+                    <p>Have the LLM evaluate its own retrieved context for relevance and completeness.</p>
+                    <p><strong>Example:</strong> The LLM might ask itself:</p>
+                    <ul>
+                        <li>"Does this context contain the specific dosage information requested?"</li>
+                        <li>"Are there any gaps in the information that need additional retrieval?"</li>
+                        <li>"Is this information current and from reliable sources?"</li>
+                        <li>"Does this context address all aspects of the query?"</li>
+                    </ul>
+                    <p>If gaps are identified, the system can perform additional targeted retrievals.</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('contextual-refinements', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot active" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('contextual-refinements', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contextual Refinements - Slide 4 -->
+        <section id="contextual-refinements-4" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Contextual Refinements</h2>
+                <div class="slide-content">
+                    <h3>Contextual Relevance Scoring</h3>
+                    <p>Score each piece of retrieved information based on its relevance to the specific query.</p>
+                    <p><strong>Example:</strong> For "warfarin and vitamin K interactions":</p>
+                    <ul>
+                        <li>Score 0.9: Direct information about warfarin-vitamin K mechanism</li>
+                        <li>Score 0.7: General warfarin dosing guidelines</li>
+                        <li>Score 0.5: Vitamin K dietary sources</li>
+                        <li>Score 0.2: Unrelated anticoagulant information</li>
+                    </ul>
+                    <p>Only include chunks with scores above a threshold (e.g., 0.6).</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('contextual-refinements', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot active" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('contextual-refinements', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- External Tools & APIs - Slide 1 -->
+        <section id="external-tools-1" class="step slide-section">
+            <div class="content">
+                <h2>Integrating External Tools & APIs</h2>
+                <div class="slide-content">
+                    <h3>Search Engine Integration</h3>
+                    <p>Augment local knowledge with current information from the web.</p>
+                    <p><strong>Example:</strong> For "latest COVID-19 treatment guidelines":</p>
+                    <ul>
+                        <li>Local knowledge: General COVID-19 information from 2022</li>
+                        <li>Web search: Current CDC, WHO, and FDA guidelines</li>
+                        <li>Result: Combines foundational knowledge with up-to-date recommendations</li>
+                    </ul>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('external-tools', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot active" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                        <span class="dot" data-slide="4"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('external-tools', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- External Tools & APIs - Slide 2 -->
+        <section id="external-tools-2" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Integrating External Tools & APIs</h2>
+                <div class="slide-content">
+                    <h3>Medical Database APIs</h3>
+                    <p>Connect to specialized medical databases for authoritative information.</p>
+                    <p><strong>Example:</strong> For "drug interaction with patient's current medications":</p>
+                    <ul>
+                        <li>UMLS (Unified Medical Language System): For medical terminology</li>
+                        <li>DrugBank: For comprehensive drug information</li>
+                        <li>PubMed: For latest research findings</li>
+                        <li>ClinicalTrials.gov: For ongoing studies</li>
+                    </ul>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('external-tools', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot active" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                        <span class="dot" data-slide="4"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('external-tools', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- External Tools & APIs - Slide 3 -->
+        <section id="external-tools-3" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Integrating External Tools & APIs</h2>
+                <div class="slide-content">
+                    <h3>Real-Time Data Sources</h3>
+                    <p>Access current information that changes frequently.</p>
+                    <p><strong>Example:</strong> For "current flu season recommendations":</p>
+                    <ul>
+                        <li>CDC flu activity maps</li>
+                        <li>Local health department alerts</li>
+                        <li>Vaccine availability information</li>
+                        <li>Regional outbreak data</li>
+                    </ul>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('external-tools', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot active" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                        <span class="dot" data-slide="4"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('external-tools', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- External Tools & APIs - Slide 4 -->
+        <section id="external-tools-4" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Integrating External Tools & APIs</h2>
+                <div class="slide-content">
+                    <h3>Specialized Medical Tools</h3>
+                    <p>Integrate with clinical decision support systems and calculators.</p>
+                    <p><strong>Example:</strong> For "calculate warfarin dose for patient with specific factors":</p>
+                    <ul>
+                        <li>INR calculator based on patient's lab values</li>
+                        <li>Drug interaction checker</li>
+                        <li>Renal function calculator</li>
+                        <li>Age-adjusted dosing recommendations</li>
+                    </ul>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('external-tools', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot active" data-slide="3"></span>
+                        <span class="dot" data-slide="4"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('external-tools', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- External Tools & APIs - Slide 5 -->
+        <section id="external-tools-5" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Integrating External Tools & APIs</h2>
+                <div class="slide-content">
+                    <h3>Quality Control and Verification</h3>
+                    <p>Ensure external information meets quality standards before integration.</p>
+                    <p><strong>Example:</strong> When retrieving from multiple sources:</p>
+                    <ul>
+                        <li>Cross-reference information across authoritative sources</li>
+                        <li>Check publication dates and evidence levels</li>
+                        <li>Verify source credibility and conflicts of interest</li>
+                        <li>Flag conflicting information for human review</li>
+                    </ul>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('external-tools', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                        <span class="dot active" data-slide="4"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('external-tools', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
         <!-- Knowledge Graphs Section -->
         <section id="knowledge-graphs" class="step">
             <div class="content">

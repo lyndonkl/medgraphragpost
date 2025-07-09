@@ -663,8 +663,12 @@ const createRAGViz = () => {
   // Animation sequence
   let currentStep = 0
   const totalSteps = 6
+  let isPaused = false
+  let animationTimeout = null
   
   const animateStep = () => {
+    if (isPaused) return
+    
     switch(currentStep) {
       case 0:
         // Show document title and chunks
@@ -737,18 +741,60 @@ const createRAGViz = () => {
   
   // Auto-advance animation
   const autoAdvance = () => {
+    if (isPaused) return
+    
     if (currentStep < totalSteps - 1) {
       currentStep++
       animateStep()
-      setTimeout(autoAdvance, 2500) // Wait 2.5 seconds between steps
+      animationTimeout = setTimeout(autoAdvance, 2500) // Wait 2.5 seconds between steps
     }
   }
   
   // Start animation sequence
   setTimeout(() => {
     animateStep()
-    setTimeout(autoAdvance, 1500)
+    animationTimeout = setTimeout(autoAdvance, 1500)
   }, 1000)
+  
+  // Add pause/resume button
+  const pauseResumeButton = mainContainer.append('button')
+    .style('position', 'absolute')
+    .style('bottom', '20px')
+    .style('left', '20px')
+    .style('padding', '8px 16px')
+    .style('background', '#ff9800')
+    .style('color', 'white')
+    .style('border', 'none')
+    .style('border-radius', '4px')
+    .style('cursor', 'pointer')
+    .style('font-size', '12px')
+    .text('Pause')
+    .on('click', () => {
+      if (isPaused) {
+        // Resume animation
+        isPaused = false
+        pauseResumeButton
+          .style('background', '#ff9800')
+          .text('Pause')
+        
+        // Continue from where we left off
+        if (currentStep < totalSteps - 1) {
+          animationTimeout = setTimeout(autoAdvance, 1000)
+        }
+      } else {
+        // Pause animation
+        isPaused = true
+        pauseResumeButton
+          .style('background', '#4caf50')
+          .text('Resume')
+        
+        // Clear the timeout
+        if (animationTimeout) {
+          clearTimeout(animationTimeout)
+          animationTimeout = null
+        }
+      }
+    })
   
   // Add restart button
   const restartButton = mainContainer.append('button')
@@ -766,6 +812,18 @@ const createRAGViz = () => {
     .on('click', () => {
       // Reset all elements
       currentStep = 0
+      isPaused = false
+      
+      // Clear any existing timeout
+      if (animationTimeout) {
+        clearTimeout(animationTimeout)
+        animationTimeout = null
+      }
+      
+      // Reset pause/resume button
+      pauseResumeButton
+        .style('background', '#ff9800')
+        .text('Pause')
       
       // Reset document elements
       title.style('opacity', 0)
@@ -789,7 +847,7 @@ const createRAGViz = () => {
       // Restart animation
       setTimeout(() => {
         animateStep()
-        setTimeout(autoAdvance, 1500)
+        animationTimeout = setTimeout(autoAdvance, 1500)
       }, 1000)
     })
   
@@ -821,7 +879,134 @@ const createRAGViz = () => {
   })
 }
 
-// Initialize visualizations when sections come into view
+// Slide navigation functionality
+const slideStates = {
+  'smarter-chunking': 0,
+  'advanced-retrieval': 0,
+  'contextual-refinements': 0,
+  'external-tools': 0
+}
+
+const slideCounts = {
+  'smarter-chunking': 4,
+  'advanced-retrieval': 3,
+  'contextual-refinements': 4,
+  'external-tools': 5
+}
+
+function changeSlide(sectionName, direction) {
+  const currentSlide = slideStates[sectionName]
+  const totalSlides = slideCounts[sectionName]
+  
+  let newSlide = currentSlide + direction
+  
+  // Handle boundaries
+  if (newSlide < 0) newSlide = 0
+  if (newSlide >= totalSlides) newSlide = totalSlides - 1
+  
+  // Update state
+  slideStates[sectionName] = newSlide
+  
+  // Hide all slides for this section
+  for (let i = 0; i < totalSlides; i++) {
+    const slideElement = document.getElementById(`${sectionName}-${i + 1}`)
+    if (slideElement) {
+      slideElement.style.display = 'none'
+    }
+  }
+  
+  // Show the new slide
+  const newSlideElement = document.getElementById(`${sectionName}-${newSlide + 1}`)
+  if (newSlideElement) {
+    newSlideElement.style.display = 'flex'
+  }
+  
+  // Update progress dots
+  updateProgressDots(sectionName, newSlide)
+  
+  // Update navigation buttons
+  updateNavigationButtons(sectionName, newSlide, totalSlides)
+}
+
+function updateProgressDots(sectionName, currentSlide) {
+  const slideElement = document.getElementById(`${sectionName}-${currentSlide + 1}`)
+  if (!slideElement) return
+  
+  const dots = slideElement.querySelectorAll('.dot')
+  dots.forEach((dot, index) => {
+    if (index === currentSlide) {
+      dot.classList.add('active')
+    } else {
+      dot.classList.remove('active')
+    }
+  })
+}
+
+function updateNavigationButtons(sectionName, currentSlide, totalSlides) {
+  const slideElement = document.getElementById(`${sectionName}-${currentSlide + 1}`)
+  if (!slideElement) return
+  
+  const prevBtn = slideElement.querySelector('.prev-btn')
+  const nextBtn = slideElement.querySelector('.next-btn')
+  
+  if (prevBtn) {
+    prevBtn.disabled = currentSlide === 0
+  }
+  
+  if (nextBtn) {
+    nextBtn.disabled = currentSlide === totalSlides - 1
+  }
+}
+
+// Make changeSlide function globally available
+window.changeSlide = changeSlide
+
+// Initialize slide navigation
+function initSlideNavigation() {
+  // Add click handlers to all progress dots
+  document.querySelectorAll('.dot').forEach(dot => {
+    dot.addEventListener('click', function() {
+      const slideIndex = parseInt(this.getAttribute('data-slide'))
+      const sectionName = this.closest('.slide-section').id.replace(/-[0-9]+$/, '')
+      
+      // Update state
+      slideStates[sectionName] = slideIndex
+      
+      // Hide all slides for this section
+      const totalSlides = slideCounts[sectionName]
+      for (let i = 0; i < totalSlides; i++) {
+        const slideElement = document.getElementById(`${sectionName}-${i + 1}`)
+        if (slideElement) {
+          slideElement.style.display = 'none'
+        }
+      }
+      
+      // Show the selected slide
+      const selectedSlideElement = document.getElementById(`${sectionName}-${slideIndex + 1}`)
+      if (selectedSlideElement) {
+        selectedSlideElement.style.display = 'flex'
+      }
+      
+      // Update progress dots
+      updateProgressDots(sectionName, slideIndex)
+      
+      // Update navigation buttons
+      updateNavigationButtons(sectionName, slideIndex, totalSlides)
+    })
+  })
+  
+  // Initialize all slides to show first slide only
+  Object.keys(slideCounts).forEach(sectionName => {
+    const totalSlides = slideCounts[sectionName]
+    for (let i = 0; i < totalSlides; i++) {
+      const slideElement = document.getElementById(`${sectionName}-${i + 1}`)
+      if (slideElement) {
+        slideElement.style.display = i === 0 ? 'flex' : 'none'
+      }
+    }
+  })
+}
+
 const initVisualizations = () => {
   createVectorPlot()
   createRAGViz()
@@ -851,6 +1036,7 @@ scroller
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
   initVisualizations()
+  initSlideNavigation() // Initialize slide navigation
   
   // Handle window resize
   window.addEventListener('resize', scroller.resize)
