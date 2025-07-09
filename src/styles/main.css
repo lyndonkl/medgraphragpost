@@ -22,13 +22,16 @@ main {
 /* Step sections */
 .step {
   min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   padding: 60px 0;
   position: relative;
-  transition: all 0.3s ease;
+  background-color: #f8f9fa;
+  transition: background-color 0.3s ease;
+  overflow: hidden;
 }
 
 .step.active {
@@ -38,13 +41,16 @@ main {
 /* Slide section specific styles */
 .slide-section {
   min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   padding: 60px 0;
   position: relative;
-  transition: all 0.3s ease;
+  background-color: #f8f9fa;
+  transition: opacity 0.2s ease;
+  overflow: hidden;
 }
 
 .slide-content {
@@ -153,8 +159,10 @@ main {
 .content {
   text-align: center;
   max-width: 800px;
+  width: 100%;
   margin-bottom: 40px;
   z-index: 2;
+  flex-shrink: 0;
 }
 
 .content h1 {
