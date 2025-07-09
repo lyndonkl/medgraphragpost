@@ -177,6 +177,58 @@ main {
   margin-bottom: 20px;
 }
 
+/* Paper references styling */
+.paper-references {
+  margin-top: 40px;
+  text-align: left;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 20px;
+  background: rgba(25, 118, 210, 0.05);
+  border-radius: 8px;
+  border-left: 4px solid #1976d2;
+}
+
+.paper-references h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #1976d2;
+}
+
+.paper-references ul {
+  list-style: none;
+  padding: 0;
+}
+
+.paper-references li {
+  margin-bottom: 15px;
+  padding: 10px;
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.paper-references strong {
+  color: #333;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.paper-references a {
+  color: #1976d2;
+  text-decoration: none;
+  font-size: 0.9rem;
+  word-break: break-all;
+}
+
+.paper-references a:hover {
+  text-decoration: underline;
+  color: #1565c0;
+}
+
 /* Explanation text styling */
 .explanation-text {
   text-align: left;
