@@ -879,19 +879,557 @@ const createRAGViz = () => {
   })
 }
 
+// Knowledge Graph Data
+const knowledgeGraphData = {
+  nodes: [
+    { 
+      id: 'diabetes', 
+      name: 'Diabetes', 
+      acronym: 'DM',
+      type: 'disease', 
+      x: 400, y: 200,
+      properties: {
+        'ICD-10': 'E11.9',
+        'Prevalence': '9.3% of US population',
+        'Type': 'Type 2 Diabetes Mellitus',
+        'Risk Factors': 'Obesity, Family History, Age'
+      }
+    },
+    { 
+      id: 'metformin', 
+      name: 'Metformin', 
+      acronym: 'MET',
+      type: 'drug', 
+      x: 200, y: 150,
+      properties: {
+        'Generic Name': 'Metformin Hydrochloride',
+        'Drug Class': 'Biguanide',
+        'FDA Approval': '1994',
+        'Mechanism': 'Reduces hepatic glucose production'
+      }
+    },
+    { 
+      id: 'insulin', 
+      name: 'Insulin', 
+      acronym: 'INS',
+      type: 'drug', 
+      x: 200, y: 250,
+      properties: {
+        'Generic Name': 'Human Insulin',
+        'Drug Class': 'Hormone',
+        'Administration': 'Subcutaneous injection',
+        'Types': 'Rapid-acting, Long-acting, Mixed'
+      }
+    },
+    { 
+      id: 'glucose', 
+      name: 'High Glucose', 
+      acronym: 'HG',
+      type: 'symptom', 
+      x: 600, y: 150,
+      properties: {
+        'Normal Range': '70-140 mg/dL',
+        'Diagnostic': '>200 mg/dL fasting',
+        'Symptoms': 'Frequent urination, Thirst, Fatigue',
+        'Measurement': 'Blood glucose test'
+      }
+    },
+    { 
+      id: 'kidney', 
+      name: 'Kidney Disease', 
+      acronym: 'CKD',
+      type: 'disease', 
+      x: 600, y: 250,
+      properties: {
+        'ICD-10': 'N18.9',
+        'Stages': '1-5 (5 being end-stage)',
+        'eGFR Threshold': '<60 mL/min/1.73m²',
+        'Complications': 'Anemia, Bone disease, CVD'
+      }
+    },
+    { 
+      id: 'gastro', 
+      name: 'GI Upset', 
+      acronym: 'GI',
+      type: 'symptom', 
+      x: 100, y: 100,
+      properties: {
+        'Common Symptoms': 'Nausea, Diarrhea, Abdominal pain',
+        'Onset': 'Usually within 1-2 weeks',
+        'Management': 'Take with food, Gradual titration',
+        'Frequency': 'Up to 30% of patients'
+      }
+    },
+    { 
+      id: 'monitoring', 
+      name: 'Blood Tests', 
+      acronym: 'BT',
+      type: 'procedure', 
+      x: 300, y: 350,
+      properties: {
+        'Test Type': 'HbA1c, Fasting glucose',
+        'Frequency': 'Every 3-6 months',
+        'Target HbA1c': '<7%',
+        'Cost': '$20-50 per test'
+      }
+    },
+    { 
+      id: 'lifestyle', 
+      name: 'Lifestyle Changes', 
+      acronym: 'LC',
+      type: 'treatment', 
+      x: 500, y: 350,
+      properties: {
+        'Components': 'Diet, Exercise, Weight loss',
+        'Efficacy': 'Can reduce HbA1c by 1-2%',
+        'Recommendations': '150 min/week exercise',
+        'Diet': 'Low-carb, Mediterranean'
+      }
+    }
+  ],
+  links: [
+    { 
+      source: 'metformin', 
+      target: 'diabetes', 
+      label: 'treats', 
+      acronym: 'TRT',
+      strength: 0.9,
+      properties: {
+        'Evidence Level': 'A (Strong)',
+        'Dosage': '500-2550 mg daily',
+        'Efficacy': 'Reduces HbA1c by 1-2%',
+        'First Line': 'Yes, recommended first-line therapy'
+      }
+    },
+    { 
+      source: 'insulin', 
+      target: 'diabetes', 
+      label: 'treats', 
+      acronym: 'TRT',
+      strength: 0.9,
+      properties: {
+        'Evidence Level': 'A (Strong)',
+        'Indication': 'When oral agents insufficient',
+        'Dosage': 'Variable based on blood glucose',
+        'Administration': 'Subcutaneous injection'
+      }
+    },
+    { 
+      source: 'diabetes', 
+      target: 'glucose', 
+      label: 'causes', 
+      acronym: 'CAU',
+      strength: 0.8,
+      properties: {
+        'Mechanism': 'Insulin resistance and deficiency',
+        'Time Course': 'Chronic, progressive',
+        'Reversibility': 'Partial with treatment',
+        'Monitoring': 'Regular blood glucose checks'
+      }
+    },
+    { 
+      source: 'metformin', 
+      target: 'gastro', 
+      label: 'side effect', 
+      acronym: 'SE',
+      strength: 0.7,
+      properties: {
+        'Frequency': 'Up to 30% of patients',
+        'Onset': 'Usually within 1-2 weeks',
+        'Severity': 'Mild to moderate',
+        'Management': 'Take with food, gradual titration'
+      }
+    },
+    { 
+      source: 'metformin', 
+      target: 'kidney', 
+      label: 'contraindicated in', 
+      acronym: 'CI',
+      strength: 0.6,
+      properties: {
+        'Threshold': 'eGFR <30 mL/min/1.73m²',
+        'Risk': 'Lactic acidosis',
+        'Alternative': 'Insulin or other agents',
+        'Monitoring': 'Regular kidney function tests'
+      }
+    },
+    { 
+      source: 'diabetes', 
+      target: 'kidney', 
+      label: 'complicates', 
+      acronym: 'CMP',
+      strength: 0.8,
+      properties: {
+        'Mechanism': 'Hyperglycemia damages kidney vessels',
+        'Prevalence': '20-40% of diabetic patients',
+        'Prevention': 'Good glycemic control',
+        'Screening': 'Annual urine albumin test'
+      }
+    },
+    { 
+      source: 'diabetes', 
+      target: 'monitoring', 
+      label: 'requires', 
+      acronym: 'REQ',
+      strength: 0.9,
+      properties: {
+        'Frequency': 'Every 3-6 months',
+        'Tests': 'HbA1c, Fasting glucose, Kidney function',
+        'Targets': 'HbA1c <7%, BP <140/90',
+        'Cost': '$200-500 annually'
+      }
+    },
+    { 
+      source: 'lifestyle', 
+      target: 'diabetes', 
+      label: 'manages', 
+      acronym: 'MNG',
+      strength: 0.7,
+      properties: {
+        'Efficacy': 'Can reduce HbA1c by 1-2%',
+        'Components': 'Diet, Exercise, Weight loss',
+        'Sustainability': 'Long-term lifestyle changes',
+        'Support': 'Diabetes education programs'
+      }
+    },
+    { 
+      source: 'monitoring', 
+      target: 'glucose', 
+      label: 'measures', 
+      acronym: 'MSR',
+      strength: 0.8,
+      properties: {
+        'Test Type': 'Blood glucose, HbA1c',
+        'Accuracy': 'Laboratory standard',
+        'Frequency': 'As needed for control',
+        'Interpretation': 'Compare to target ranges'
+      }
+    }
+  ]
+}
+
+// Node type colors
+const nodeTypeColors = {
+  disease: '#d32f2f',
+  drug: '#1976d2',
+  symptom: '#f57c00',
+  procedure: '#7b1fa2',
+  treatment: '#388e3c'
+}
+
+// Relationship type colors
+const relationshipColors = {
+  treats: '#388e3c',
+  causes: '#d32f2f',
+  'side effect': '#f57c00',
+  'contraindicated in': '#d32f2f',
+  complicates: '#d32f2f',
+  requires: '#1976d2',
+  manages: '#388e3c',
+  measures: '#7b1fa2'
+}
+
+// Knowledge Graph Visualization
+const createKnowledgeGraph = () => {
+  const container = d3.select('#knowledge-graph-viz')
+  container.html('') // Clear existing content
+  
+  const margin = { top: 40, right: 40, bottom: 40, left: 40 }
+  const width = 800 - margin.left - margin.right
+  const height = 500 - margin.top - margin.bottom
+  
+  // Create SVG
+  const svg = container.append('svg')
+    .attr('width', width + margin.left + margin.right)
+    .attr('height', height + margin.top + margin.bottom)
+    .style('background', 'white')
+    .style('border-radius', '8px')
+    .style('box-shadow', '0 2px 4px rgba(0,0,0,0.1)')
+  
+  const g = svg.append('g')
+    .attr('transform', `translate(${margin.left},${margin.top})`)
+  
+  // Create scales
+  const xScale = d3.scaleLinear()
+    .domain([0, 800])
+    .range([0, width])
+  
+  const yScale = d3.scaleLinear()
+    .domain([0, 500])
+    .range([height, 0])
+  
+  // Create force simulation
+  const simulation = d3.forceSimulation(knowledgeGraphData.nodes)
+    .force('link', d3.forceLink(knowledgeGraphData.links).id(d => d.id).distance(100))
+    .force('charge', d3.forceManyBody().strength(-300))
+    .force('center', d3.forceCenter(width / 2, height / 2))
+    .force('collision', d3.forceCollide().radius(30))
+  
+  // Create arrow marker for links
+  svg.append('defs').selectAll('marker')
+    .data(['arrow'])
+    .enter().append('marker')
+    .attr('id', 'arrow')
+    .attr('viewBox', '0 -5 10 10')
+    .attr('refX', 25)
+    .attr('refY', 0)
+    .attr('markerWidth', 6)
+    .attr('markerHeight', 6)
+    .attr('orient', 'auto')
+    .append('path')
+    .attr('d', 'M0,-5L10,0L0,5')
+    .attr('fill', '#666')
+  
+  // Create links
+  const links = g.append('g')
+    .selectAll('g')
+    .data(knowledgeGraphData.links)
+    .enter().append('g')
+    .attr('class', 'link')
+  
+  // Add link lines
+  links.append('line')
+    .attr('stroke', d => relationshipColors[d.label] || '#666')
+    .attr('stroke-width', d => d.strength * 3)
+    .attr('stroke-opacity', 0.6)
+    .attr('marker-end', 'url(#arrow)')
+    .on('mouseover', function(event, d) {
+      // Highlight link
+      d3.select(this)
+        .attr('stroke-width', d.strength * 5)
+        .attr('stroke-opacity', 1)
+      
+      // Show link tooltip
+      showLinkTooltip(event, d)
+    })
+    .on('mouseout', function(event, d) {
+      // Reset link
+      d3.select(this)
+        .attr('stroke-width', d.strength * 3)
+        .attr('stroke-opacity', 0.6)
+      
+      hideLinkTooltip()
+    })
+  
+  // Add link labels (acronyms by default)
+  links.append('text')
+    .attr('dy', -5)
+    .style('font-size', '10px')
+    .style('font-weight', '500')
+    .style('fill', '#333')
+    .style('text-anchor', 'middle')
+    .style('pointer-events', 'none')
+    .text(d => d.acronym)
+  
+  // Create nodes
+  const nodes = g.append('g')
+    .selectAll('g')
+    .data(knowledgeGraphData.nodes)
+    .enter().append('g')
+    .attr('class', 'node')
+    .style('cursor', 'pointer')
+    .call(d3.drag()
+      .on('start', dragstarted)
+      .on('drag', dragged)
+      .on('end', dragended))
+  
+  // Add node circles
+  nodes.append('circle')
+    .attr('r', 20)
+    .attr('fill', d => nodeTypeColors[d.type])
+    .attr('stroke', '#333')
+    .attr('stroke-width', 2)
+    .attr('opacity', 0.8)
+    .on('mouseover', function(event, d) {
+      // Highlight node
+      d3.select(this)
+        .attr('stroke-width', 4)
+        .attr('opacity', 1)
+      
+      // Highlight connected links
+      g.selectAll('.link line')
+        .attr('stroke-opacity', link => 
+          link.source.id === d.id || link.target.id === d.id ? 1 : 0.2
+        )
+      
+      // Hide acronyms on hover
+      g.selectAll('.link text')
+        .style('opacity', 0.3)
+      
+      // Show node tooltip
+      showGraphTooltip(event, d)
+    })
+    .on('mouseout', function() {
+      // Reset node
+      d3.select(this)
+        .attr('stroke-width', 2)
+        .attr('opacity', 0.8)
+      
+      // Reset links
+      g.selectAll('.link line')
+        .attr('stroke-opacity', 0.6)
+      
+      // Show acronyms again
+      g.selectAll('.link text')
+        .style('opacity', 1)
+      
+      hideGraphTooltip()
+    })
+  
+  // Add node acronym labels
+  nodes.append('text')
+    .attr('dy', '0.35em')
+    .style('font-size', '11px')
+    .style('font-weight', '600')
+    .style('fill', 'white')
+    .style('text-anchor', 'middle')
+    .style('pointer-events', 'none')
+    .text(d => d.acronym)
+  
+  // Update positions on simulation tick
+  simulation.on('tick', () => {
+    links.select('line')
+      .attr('x1', d => d.source.x)
+      .attr('y1', d => d.source.y)
+      .attr('x2', d => d.target.x)
+      .attr('y2', d => d.target.y)
+    
+    links.select('text')
+      .attr('x', d => (d.source.x + d.target.x) / 2)
+      .attr('y', d => (d.source.y + d.target.y) / 2)
+    
+    nodes.attr('transform', d => `translate(${d.x},${d.y})`)
+  })
+  
+  // Drag functions
+  function dragstarted(event, d) {
+    if (!event.active) simulation.alphaTarget(0.3).restart()
+    d.fx = d.x
+    d.fy = d.y
+  }
+  
+  function dragged(event, d) {
+    d.fx = event.x
+    d.fy = event.y
+  }
+  
+  function dragended(event, d) {
+    if (!event.active) simulation.alphaTarget(0)
+    d.fx = null
+    d.fy = null
+  }
+  
+  // Tooltip functions
+  function showGraphTooltip(event, d) {
+    const tooltip = d3.select('body').append('div')
+      .attr('class', 'tooltip')
+      .style('opacity', 0)
+    
+    tooltip.transition()
+      .duration(200)
+      .style('opacity', 1)
+    
+    // Create properties HTML
+    const propertiesHtml = Object.entries(d.properties)
+      .map(([key, value]) => `<strong>${key}:</strong> ${value}`)
+      .join('<br/>')
+    
+    tooltip.html(`
+      <strong>${d.name}</strong> (${d.acronym})<br/>
+      Type: ${d.type}<br/>
+      Connections: ${knowledgeGraphData.links.filter(l => 
+        l.source.id === d.id || l.target.id === d.id
+      ).length}<br/><br/>
+      <strong>Properties:</strong><br/>
+      ${propertiesHtml}
+    `)
+      .style('left', (event.pageX + 10) + 'px')
+      .style('top', (event.pageY - 10) + 'px')
+  }
+  
+  function showLinkTooltip(event, d) {
+    const tooltip = d3.select('body').append('div')
+      .attr('class', 'tooltip')
+      .style('opacity', 0)
+    
+    tooltip.transition()
+      .duration(200)
+      .style('opacity', 1)
+    
+    // Create properties HTML
+    const propertiesHtml = Object.entries(d.properties)
+      .map(([key, value]) => `<strong>${key}:</strong> ${value}`)
+      .join('<br/>')
+    
+    tooltip.html(`
+      <strong>${d.label}</strong> (${d.acronym})<br/>
+      From: ${d.source.name} → To: ${d.target.name}<br/>
+      Strength: ${d.strength}<br/><br/>
+      <strong>Properties:</strong><br/>
+      ${propertiesHtml}
+    `)
+      .style('left', (event.pageX + 10) + 'px')
+      .style('top', (event.pageY - 10) + 'px')
+  }
+  
+  function hideGraphTooltip() {
+    d3.selectAll('.tooltip').remove()
+  }
+  
+  function hideLinkTooltip() {
+    d3.selectAll('.tooltip').remove()
+  }
+  
+  // Add legend
+  const legend = svg.append('g')
+    .attr('transform', `translate(${width - 150}, 20)`)
+  
+  // Node type legend
+  const nodeTypes = Object.keys(nodeTypeColors)
+  nodeTypes.forEach((type, i) => {
+    const legendItem = legend.append('g')
+      .attr('transform', `translate(0, ${i * 25})`)
+    
+    legendItem.append('circle')
+      .attr('r', 8)
+      .attr('fill', nodeTypeColors[type])
+      .attr('stroke', '#333')
+      .attr('stroke-width', 1)
+    
+    legendItem.append('text')
+      .attr('x', 15)
+      .attr('dy', '0.35em')
+      .style('font-size', '10px')
+      .style('fill', '#333')
+      .text(type)
+  })
+  
+  // Add title
+  g.append('text')
+    .attr('class', 'title')
+    .attr('text-anchor', 'middle')
+    .attr('x', width / 2)
+    .attr('y', -10)
+    .style('font-size', '16px')
+    .style('font-weight', '600')
+    .text('Medical Knowledge Graph')
+}
+
 // Slide navigation functionality
 const slideStates = {
   'smarter-chunking': 0,
   'advanced-retrieval': 0,
   'contextual-refinements': 0,
-  'external-tools': 0
+  'external-tools': 0,
+  'knowledge-graphs-intro': 0
 }
 
 const slideCounts = {
   'smarter-chunking': 4,
   'advanced-retrieval': 3,
   'contextual-refinements': 4,
-  'external-tools': 5
+  'external-tools': 5,
+  'knowledge-graphs-intro': 3
 }
 
 function changeSlide(sectionName, direction) {
@@ -1010,6 +1548,7 @@ function initSlideNavigation() {
 const initVisualizations = () => {
   createVectorPlot()
   createRAGViz()
+  createKnowledgeGraph()
 }
 
 // Scrollama setup

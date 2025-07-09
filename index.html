@@ -609,13 +609,88 @@
             </div>
         </section>
 
-        <!-- Knowledge Graphs Section -->
-        <section id="knowledge-graphs" class="step">
+        <!-- Knowledge Graphs Introduction - Slide 1 -->
+        <section id="knowledge-graphs-intro-1" class="step slide-section">
             <div class="content">
                 <h2>Knowledge Graphs</h2>
-                <p>Structured relationships between medical concepts</p>
+                <div class="slide-content">
+                    <h3>What are Knowledge Graphs?</h3>
+                    <p>Knowledge graphs are structured representations of information that connect concepts through meaningful relationships. Unlike traditional databases that store isolated facts, knowledge graphs capture the rich web of connections between entities, enabling more sophisticated reasoning and discovery.</p>
+                    
+                    <h4>Core Components</h4>
+                    <p><strong>Nodes (Entities):</strong> Represent real-world objects, concepts, or ideas. In medical contexts, these could be diseases, drugs, symptoms, procedures, or patients.</p>
+                    <p><strong>Edges (Relationships):</strong> Define how entities are connected. These relationships carry semantic meaning, such as "treats," "causes," "contraindicated for," or "monitored by."</p>
+                    <p><strong>Properties:</strong> Additional attributes that describe entities or relationships, such as dosage information, side effects, or evidence levels.</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('knowledge-graphs-intro', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot active" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('knowledge-graphs-intro', 1)">→</button>
+                </div>
             </div>
-            <div class="visualization" id="knowledge-graphs-viz"></div>
+        </section>
+
+        <!-- Knowledge Graphs Introduction - Slide 2 -->
+        <section id="knowledge-graphs-intro-2" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Knowledge Graphs</h2>
+                <div class="slide-content">
+                    <h3>Why Knowledge Graphs Matter for Medical AI</h3>
+                    <p><strong>Complex Reasoning:</strong> Medical questions often require connecting multiple pieces of information across different domains. For example, understanding drug interactions requires knowledge about pharmacology, patient conditions, and treatment protocols.</p>
+                    <p><strong>Contextual Understanding:</strong> Knowledge graphs preserve the context and relationships between medical concepts, allowing AI systems to understand the "why" behind medical decisions, not just the "what."</p>
+                    <p><strong>Discoverability:</strong> By explicitly modeling relationships, knowledge graphs can reveal hidden connections and suggest relevant information that might not be directly mentioned in a query.</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('knowledge-graphs-intro', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot active" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('knowledge-graphs-intro', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Knowledge Graphs Introduction - Slide 3 -->
+        <section id="knowledge-graphs-intro-3" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Knowledge Graphs</h2>
+                <div class="slide-content">
+                    <h3>Medical Knowledge Graph Example</h3>
+                    <p>Consider a patient with diabetes asking about metformin side effects. A knowledge graph would connect:</p>
+                    <ul>
+                        <li><strong>Patient</strong> → <strong>has condition</strong> → <strong>Diabetes</strong></li>
+                        <li><strong>Metformin</strong> → <strong>treats</strong> → <strong>Diabetes</strong></li>
+                        <li><strong>Metformin</strong> → <strong>has side effect</strong> → <strong>Gastrointestinal upset</strong></li>
+                        <li><strong>Metformin</strong> → <strong>contraindicated in</strong> → <strong>Severe kidney disease</strong></li>
+                        <li><strong>Patient</strong> → <strong>should monitor</strong> → <strong>Kidney function</strong></li>
+                    </ul>
+                    <p>This interconnected structure allows the system to provide comprehensive, contextually relevant answers that consider the patient's specific situation.</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('knowledge-graphs-intro', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot active" data-slide="2"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('knowledge-graphs-intro', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Knowledge Graphs Visualization -->
+        <section id="knowledge-graphs-viz" class="step">
+            <div class="content">
+                <h2>Medical Knowledge Graph</h2>
+                <p>Interactive visualization of medical concepts and their relationships</p>
+            </div>
+            <div class="visualization" id="knowledge-graph-viz"></div>
         </section>
 
         <!-- GraphRAG Section -->
