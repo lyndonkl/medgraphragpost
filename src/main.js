@@ -1422,7 +1422,8 @@ const slideStates = {
   'contextual-refinements': 0,
   'external-tools': 0,
   'knowledge-graphs-intro': 0,
-  'graphrag-approaches': 0
+  'graphrag-approaches': 0,
+  'graphrag-advantages': 0
 }
 
 const slideCounts = {
@@ -1431,7 +1432,8 @@ const slideCounts = {
   'contextual-refinements': 4,
   'external-tools': 5,
   'knowledge-graphs-intro': 4,
-  'graphrag-approaches': 4
+  'graphrag-approaches': 4,
+  'graphrag-advantages': 4
 }
 
 function changeSlide(sectionName, direction) {

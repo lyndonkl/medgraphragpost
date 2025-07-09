@@ -887,6 +887,145 @@
             </div>
         </section>
 
+        <!-- GraphRAG Advantages - Slide 1 -->
+        <section id="graphrag-advantages-1" class="step slide-section">
+            <div class="content">
+                <h2>GraphRAG Advantages</h2>
+                <div class="slide-content">
+                    <h3>Why GraphRAG Outperforms Traditional RAG</h3>
+                    <p>GraphRAG demonstrates clear advantages over traditional RAG systems across multiple dimensions, from efficiency to accuracy.</p>
+                    
+                    <h4>Key Performance Improvements</h4>
+                    <ul>
+                        <li><strong>Token Efficiency:</strong> 26% to 97% fewer tokens used</li>
+                        <li><strong>Complex Query Answering:</strong> Superior multi-hop reasoning</li>
+                        <li><strong>Contextual Understanding:</strong> Richer, interconnected context</li>
+                        <li><strong>Scalability:</strong> Better performance at scale</li>
+                    </ul>
+                    
+                    <p>Let's explore each advantage in detail to understand the real-world impact.</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('graphrag-advantages', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot active" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('graphrag-advantages', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- GraphRAG Advantages - Slide 2 -->
+        <section id="graphrag-advantages-2" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>GraphRAG Advantages</h2>
+                <div class="slide-content">
+                    <h3>Significant Token Efficiency</h3>
+                    <p><strong>The Numbers:</strong> GraphRAG responses use 26% to 97% fewer tokens compared to traditional RAG.</p>
+                    
+                    <h4>Real-World Impact</h4>
+                    <ul>
+                        <li><strong>Faster Generation:</strong> Less text to process means quicker response times</li>
+                        <li><strong>Lower Computational Costs:</strong> Reduced token usage directly translates to cost savings</li>
+                        <li><strong>Better Resource Utilization:</strong> More efficient use of context window space</li>
+                    </ul>
+                    
+                    <h4>Medical Example</h4>
+                    <p><strong>Traditional RAG:</strong> "Metformin is an oral diabetes medication that belongs to the biguanide class. It works by decreasing glucose production in the liver and improving insulin sensitivity. The typical starting dose is 500mg twice daily with meals. It can be titrated up to 2550mg daily in divided doses. In patients with reduced kidney function, specifically those with eGFR less than 30, metformin should be avoided due to the risk of lactic acidosis..." (150+ tokens)</p>
+                    
+                    <p><strong>GraphRAG:</strong> "Metformin: Start 500mg bid, max 2550mg/day. Avoid if eGFR &lt; 30." (15 tokens)</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('graphrag-advantages', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot active" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('graphrag-advantages', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- GraphRAG Advantages - Slide 3 -->
+        <section id="graphrag-advantages-3" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>GraphRAG Advantages</h2>
+                <div class="slide-content">
+                    <h3>Superior Complex Query Answering</h3>
+                    <p>GraphRAG excels at multi-hop reasoning and deep domain-specific questions that traditional RAG struggles with.</p>
+                    
+                    <h4>Multi-Hop Reasoning Capability</h4>
+                    <p><strong>Example Query:</strong> "What monitoring is needed for a diabetic patient with kidney disease starting SGLT2 inhibitors?"</p>
+                    
+                    <p><strong>GraphRAG Reasoning Path:</strong></p>
+                    <ul>
+                        <li>Diabetes → requires → Blood Glucose Monitoring</li>
+                        <li>Kidney Disease → requires → Kidney Function Tests</li>
+                        <li>SGLT2 Inhibitors → can cause → Ketoacidosis</li>
+                        <li>Therefore: Monitor glucose, kidney function, AND ketone levels</li>
+                    </ul>
+                    
+                    <h4>Impact</h4>
+                    <p><strong>More Accurate:</strong> Connects related concepts that traditional RAG might miss</p>
+                    <p><strong>Comprehensive:</strong> Provides complete answers to complex medical scenarios</p>
+                    <p><strong>Clinically Relevant:</strong> Understands medical relationships and implications</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('graphrag-advantages', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot active" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('graphrag-advantages', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- GraphRAG Advantages - Slide 4 -->
+        <section id="graphrag-advantages-4" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>GraphRAG Advantages</h2>
+                <div class="slide-content">
+                    <h3>Improved Scalability & Efficiency</h3>
+                    <p>Graph structures enable more efficient querying of large, complex knowledge bases while maintaining performance as data volume grows.</p>
+                    
+                    <h4>Scalability Benefits</h4>
+                    <ul>
+                        <li><strong>Intelligent Filtering:</strong> Graph traversal only explores relevant paths</li>
+                        <li><strong>Hierarchical Organization:</strong> Knowledge is structured for efficient access</li>
+                        <li><strong>Predictable Performance:</strong> Query time doesn't grow linearly with data size</li>
+                        <li><strong>Domain-Specific Optimization:</strong> Medical knowledge is organized for clinical relevance</li>
+                    </ul>
+                    
+                    <h4>Real-World Impact</h4>
+                    <p><strong>Large Knowledge Bases:</strong> Can handle millions of medical concepts efficiently</p>
+                    <p><strong>Real-Time Applications:</strong> Fast enough for clinical decision support</p>
+                    <p><strong>Cost-Effective Scaling:</strong> Better performance per computational dollar</p>
+                    
+                    <h4>Comparison</h4>
+                    <p><strong>Traditional RAG:</strong> Searches entire document collection for every query</p>
+                    <p><strong>GraphRAG:</strong> Follows specific paths through relevant knowledge subgraphs</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('graphrag-advantages', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot active" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('graphrag-advantages', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
         <!-- GraphRAG Section -->
         <section id="graphrag" class="step">
             <div class="content">
