@@ -1417,6 +1417,7 @@ const createKnowledgeGraph = () => {
 
 // Slide navigation functionality
 const slideStates = {
+  'embeddings': 0,
   'smarter-chunking': 0,
   'advanced-retrieval': 0,
   'contextual-refinements': 0,
@@ -1427,6 +1428,7 @@ const slideStates = {
 }
 
 const slideCounts = {
+  'embeddings': 3,
   'smarter-chunking': 4,
   'advanced-retrieval': 3,
   'contextual-refinements': 4,
