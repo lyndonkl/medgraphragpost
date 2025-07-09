@@ -1425,7 +1425,8 @@ const slideStates = {
   'knowledge-graphs-intro': 0,
   'graphrag-approaches': 0,
   'graphrag-advantages': 0,
-  'medgraphrag-intro': 0
+  'medgraphrag-intro': 0,
+  'graph-construction': 0
 }
 
 const slideCounts = {
@@ -1437,7 +1438,8 @@ const slideCounts = {
   'knowledge-graphs-intro': 4,
   'graphrag-approaches': 4,
   'graphrag-advantages': 4,
-  'medgraphrag-intro': 3
+  'medgraphrag-intro': 3,
+  'graph-construction': 4
 }
 
 function changeSlide(sectionName, direction) {
@@ -1504,8 +1506,292 @@ function updateNavigationButtons(sectionName, currentSlide, totalSlides) {
   }
 }
 
-// Make changeSlide function globally available
-window.changeSlide = changeSlide
+// === Entity Extraction Animation for Graph Construction Slide ===
+
+const entityExtractionData = {
+  nodes: [
+    // Chunk A
+    { id: 'covid19', label: 'Covid-19', acronym: 'CoV', type: 'disease', chunk: 'A', context: 'Covid-19 is a respiratory disease that can cause severe illness in some patients.' },
+    { id: 'remdesivir', label: 'Remdesivir', acronym: 'Rem', type: 'drug', chunk: 'A', context: 'Remdesivir is an antiviral drug used to treat Covid-19 and has shown some effectiveness.' },
+    { id: 'respiratory', label: 'Respiratory diseases', acronym: 'Res', type: 'disease', chunk: 'A', context: 'Respiratory diseases like Covid-19 may require antiviral and anti-inflammatory treatments.' },
+    // Chunk B
+    { id: 'glucocorticoids', label: 'Glucocorticoids', acronym: 'Glu', type: 'hormone', chunk: 'B', context: 'Glucocorticoids are hormones that help reduce inflammation in the body.' },
+    { id: 'dexamethasone', label: 'Dexamethasone', acronym: 'Dex', type: 'drug', chunk: 'B', context: 'Dexamethasone is a pharmacologic substance classified as a glucocorticoid.' }
+  ],
+  links: [
+    { source: 'remdesivir', target: 'covid19', label: 'treats' },
+    { source: 'covid19', target: 'respiratory', label: 'is a' },
+    { source: 'dexamethasone', target: 'glucocorticoids', label: 'is a' }
+  ]
+};
+
+const entityNodeTypeColors = {
+  disease: '#1976d2',
+  drug: '#d32f2f',
+  hormone: '#7b1fa2'
+};
+
+let entityAnimationState = {
+  playing: false,
+  paused: false,
+  currentStep: 0,
+  nodeTransitions: [],
+  linkTransitions: []
+};
+
+function setupEntityGraphControls() {
+  console.log('setupEntityGraphControls called');
+  const controls = d3.select('#entity-graph-controls');
+  controls.html('');
+  
+  const playBtn = controls.append('button')
+    .attr('id', 'entity-play-btn')
+    .text('Play')
+    .style('padding', '8px 18px')
+    .style('background', '#1976d2')
+    .style('color', 'white')
+    .style('border', 'none')
+    .style('border-radius', '4px')
+    .style('font-size', '14px')
+    .style('cursor', 'pointer')
+    .on('click', () => {
+      if (!entityAnimationState.playing) {
+        animateEntityExtraction();
+      } else if (entityAnimationState.paused) {
+        resumeEntityExtraction();
+      }
+    });
+
+  const pauseBtn = controls.append('button')
+    .attr('id', 'entity-pause-btn')
+    .text('Pause')
+    .style('padding', '8px 18px')
+    .style('background', '#888')
+    .style('color', 'white')
+    .style('border', 'none')
+    .style('border-radius', '4px')
+    .style('font-size', '14px')
+    .style('cursor', 'pointer')
+    .on('click', () => {
+      pauseEntityExtraction();
+    });
+
+  const restartBtn = controls.append('button')
+    .attr('id', 'entity-restart-btn')
+    .text('Restart')
+    .style('padding', '8px 18px')
+    .style('background', '#43a047')
+    .style('color', 'white')
+    .style('border', 'none')
+    .style('border-radius', '4px')
+    .style('font-size', '14px')
+    .style('cursor', 'pointer')
+    .on('click', () => {
+      animateEntityExtraction();
+    });
+}
+
+function animateEntityExtraction() {
+  console.log('animateEntityExtraction called');
+  entityAnimationState.playing = true;
+  entityAnimationState.paused = false;
+  entityAnimationState.currentStep = 0;
+  entityAnimationState.nodeTransitions = [];
+  entityAnimationState.linkTransitions = [];
+
+  const svg = d3.select('#entity-graph-svg');
+  console.log('SVG selection:', svg.node());
+  svg.selectAll('*').remove();
+
+  const width = +svg.attr('width');
+  const height = +svg.attr('height');
+  console.log('SVG width/height:', width, height);
+
+  // Layout positions for nodes (centered)
+  const nodePositions = {
+    covid19: { x: 120, y: 120 },
+    remdesivir: { x: 240, y: 80 },
+    respiratory: { x: 240, y: 180 },
+    glucocorticoids: { x: 120, y: 300 },
+    dexamethasone: { x: 240, y: 320 }
+  };
+
+  // Initial X for animation (off to the left)
+  const startX = -80;
+
+  // Animate nodes flying in from the left
+  const nodes = svg.selectAll('.entity-node')
+    .data(entityExtractionData.nodes)
+    .enter()
+    .append('g')
+    .attr('class', 'entity-node')
+    .attr('transform', d => `translate(${startX},${nodePositions[d.id].y})`)
+    .attr('opacity', 0)
+    .on('mouseover', function(event, d) {
+      showNodeTooltip(event, d);
+    })
+    .on('mouseout', function() {
+      hideTooltip();
+    });
+
+  nodes.append('circle')
+    .attr('r', 26)
+    .attr('fill', d => entityNodeTypeColors[d.type] || '#aaa')
+    .attr('stroke', '#333')
+    .attr('stroke-width', 2);
+
+  // Show only acronym as main label
+  nodes.append('text')
+    .attr('text-anchor', 'middle')
+    .attr('y', 6)
+    .attr('fill', '#fff')
+    .attr('font-size', 18)
+    .attr('font-weight', 700)
+    .text(d => d.acronym);
+
+  // Animate in sequence
+  let finishedNodes = 0;
+  nodes.each(function(d, i) {
+    const node = d3.select(this);
+    const t = node.transition()
+      .delay(i * 300)
+      .duration(700)
+      .attr('transform', `translate(${nodePositions[d.id].x},${nodePositions[d.id].y})`)
+      .attr('opacity', 1)
+      .on('end', () => {
+        finishedNodes++;
+        if (finishedNodes === entityExtractionData.nodes.length) {
+          drawLinks();
+        }
+      });
+    entityAnimationState.nodeTransitions.push(t);
+  });
+
+  // Draw links (edges) after nodes appear
+  function drawLinks() {
+    const links = svg.selectAll('.link')
+      .data(entityExtractionData.links)
+      .enter()
+      .append('line')
+      .attr('class', 'link')
+      .attr('x1', d => nodePositions[d.source].x)
+      .attr('y1', d => nodePositions[d.source].y)
+      .attr('x2', d => nodePositions[d.target].x)
+      .attr('y2', d => nodePositions[d.target].y)
+      .attr('stroke', '#888')
+      .attr('stroke-width', 2)
+      .attr('opacity', 0)
+      .on('mouseover', function(event, d) {
+        showEdgeTooltip(event, d);
+      })
+      .on('mouseout', function() {
+        hideTooltip();
+      });
+
+    links.transition()
+      .delay((d, i) => 800 + i * 200)
+      .duration(400)
+      .attr('opacity', 1);
+
+    // Add edge labels (smaller, neat font)
+    const labels = svg.selectAll('.link-label')
+      .data(entityExtractionData.links)
+      .enter()
+      .append('text')
+      .attr('class', 'link-label')
+      .attr('x', d => (nodePositions[d.source].x + nodePositions[d.target].x) / 2)
+      .attr('y', d => (nodePositions[d.source].y + nodePositions[d.target].y) / 2 - 10)
+      .attr('text-anchor', 'middle')
+      .attr('fill', '#555')
+      .attr('font-size', 13)
+      .attr('font-weight', 500)
+      .attr('opacity', 0)
+      .text(d => d.label)
+      .on('mouseover', function(event, d) {
+        showEdgeTooltip(event, d);
+      })
+      .on('mouseout', function() {
+        hideTooltip();
+      });
+
+    labels.transition()
+      .delay((d, i) => 1000 + i * 200)
+      .duration(400)
+      .attr('opacity', 1);
+  }
+}
+
+// Tooltip helpers
+function showNodeTooltip(event, d) {
+  hideTooltip();
+  const tooltip = d3.select('body').append('div')
+    .attr('class', 'tooltip')
+    .style('position', 'absolute')
+    .style('background', 'rgba(0,0,0,0.92)')
+    .style('color', 'white')
+    .style('padding', '10px 16px')
+    .style('border-radius', '6px')
+    .style('font-size', '14px')
+    .style('pointer-events', 'none')
+    .style('z-index', 1000)
+    .style('box-shadow', '0 2px 8px rgba(0,0,0,0.3)');
+  tooltip.html(`
+    <div><strong>Name:</strong> ${d.label}</div>
+    <div><strong>Type:</strong> ${d.type.charAt(0).toUpperCase() + d.type.slice(1)}</div>
+    <div style="margin-top: 6px;"><strong>Context:</strong><br/><span style="font-style: italic; color: #b3e5fc;">"${d.context}"</span></div>
+  `)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 10) + 'px');
+}
+
+function showEdgeTooltip(event, d) {
+  hideTooltip();
+  const src = entityExtractionData.nodes.find(n => n.id === d.source);
+  const tgt = entityExtractionData.nodes.find(n => n.id === d.target);
+  const tooltip = d3.select('body').append('div')
+    .attr('class', 'tooltip')
+    .style('position', 'absolute')
+    .style('background', 'rgba(0,0,0,0.92)')
+    .style('color', 'white')
+    .style('padding', '10px 16px')
+    .style('border-radius', '6px')
+    .style('font-size', '14px')
+    .style('pointer-events', 'none')
+    .style('z-index', 1000)
+    .style('box-shadow', '0 2px 8px rgba(0,0,0,0.3)');
+  tooltip.html(`
+    <strong>${d.label}</strong><br/>
+    <span style='color:#90caf9'>${src ? src.label : d.source}</span> → <span style='color:#f48fb1'>${tgt ? tgt.label : d.target}</span>
+  `)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 10) + 'px');
+}
+
+function hideTooltip() {
+  d3.selectAll('.tooltip').remove();
+}
+
+// Hook into slide navigation to set up controls (but do not auto-play)
+const originalChangeSlide = changeSlide;
+window.changeSlide = function(sectionName, direction) {
+  console.log('window.changeSlide called', sectionName, direction, slideStates[sectionName]);
+  originalChangeSlide(sectionName, direction);
+  if (sectionName === 'graph-construction' && slideStates[sectionName] === 2) {
+    setupEntityGraphControls();
+  }
+};
+
+// Add a MutationObserver to watch for the entity extraction slide becoming visible
+const entitySlide = document.getElementById('graph-construction-3');
+if (entitySlide) {
+  const observer = new MutationObserver(() => {
+    const style = window.getComputedStyle(entitySlide);
+    if (style.display !== 'none') {
+      setupEntityGraphControls();
+    }
+  });
+  observer.observe(entitySlide, { attributes: true, attributeFilter: ['style'] });
+}
 
 // Initialize slide navigation
 function initSlideNavigation() {
