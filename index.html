@@ -733,6 +733,142 @@
             </div>
         </section>
 
+        <!-- GraphRAG Approaches - Slide 1 -->
+        <section id="graphrag-approaches-1" class="step slide-section">
+            <div class="content">
+                <h2>GraphRAG Approaches</h2>
+                <div class="slide-content">
+                    <h3>Different Ways to Build GraphRAG</h3>
+                    <p>GraphRAG isn't one-size-fits-all. Different approaches serve different needs, from simple knowledge lookup to complex reasoning systems.</p>
+                    
+                    <h4>Three Main Approaches</h4>
+                    <ul>
+                        <li><strong>Knowledge-Based GraphRAG:</strong> The graph IS the knowledge</li>
+                        <li><strong>Index-Based GraphRAG:</strong> The graph helps FIND knowledge</li>
+                        <li><strong>Hybrid GraphRAG:</strong> Combines both approaches</li>
+                    </ul>
+                    
+                    <p>Each approach has different strengths and is suited for different types of medical questions and data sources.</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('graphrag-approaches', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot active" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('graphrag-approaches', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- GraphRAG Approaches - Slide 2 -->
+        <section id="graphrag-approaches-2" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>GraphRAG Approaches</h2>
+                <div class="slide-content">
+                    <h3>Knowledge-Based GraphRAG</h3>
+                    <p><strong>Core Idea:</strong> The graph is the primary source of knowledge. Facts and relationships are directly encoded in the graph structure.</p>
+                    
+                    <h4>How It Works</h4>
+                    <p>Instead of storing knowledge as text chunks, the system stores it as structured relationships. When you ask a question, the system traverses these relationships to find answers.</p>
+                    
+                    <h4>Example: Drug Interaction Lookup</h4>
+                    <p><strong>Question:</strong> "Can a patient with kidney disease take metformin?"</p>
+                    <p><strong>Graph Traversal:</strong></p>
+                    <ul>
+                        <li>Find: Metformin → contraindicated in → Kidney Disease</li>
+                        <li>Find: Kidney Disease → severity levels → eGFR thresholds</li>
+                        <li>Result: "Metformin contraindicated if eGFR &lt; 30"</li>
+                    </ul>
+                    
+                    <p><strong>Best for:</strong> Factual queries, structured medical knowledge, regulatory information</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('graphrag-approaches', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot active" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('graphrag-approaches', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- GraphRAG Approaches - Slide 3 -->
+        <section id="graphrag-approaches-3" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>GraphRAG Approaches</h2>
+                <div class="slide-content">
+                    <h3>Index-Based GraphRAG</h3>
+                    <p><strong>Core Idea:</strong> The graph acts as a smart index over your raw text documents. It helps find the right text chunks more effectively.</p>
+                    
+                    <h4>How It Works</h4>
+                    <p>The graph represents relationships between text chunks or concepts. When you ask a question, the system uses the graph to identify the most relevant text passages, then retrieves and processes those chunks.</p>
+                    
+                    <h4>Example: Clinical Guideline Search</h4>
+                    <p><strong>Question:</strong> "What's the latest treatment protocol for diabetic patients with heart disease?"</p>
+                    <p><strong>Graph-Assisted Retrieval:</strong></p>
+                    <ul>
+                        <li>Graph identifies: Diabetes + Heart Disease + Treatment concepts</li>
+                        <li>Finds connected text chunks from guidelines</li>
+                        <li>Retrieves: "ADA 2023 guidelines, section 9.4: Cardiovascular disease management"</li>
+                        <li>LLM processes the retrieved text for final answer</li>
+                    </ul>
+                    
+                    <p><strong>Best for:</strong> Complex clinical scenarios, research papers, detailed treatment protocols</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('graphrag-approaches', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot active" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('graphrag-approaches', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- GraphRAG Approaches - Slide 4 -->
+        <section id="graphrag-approaches-4" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>GraphRAG Approaches</h2>
+                <div class="slide-content">
+                    <h3>Hybrid GraphRAG</h3>
+                    <p><strong>Core Idea:</strong> Combines both approaches. Uses a knowledge graph for high-level reasoning and structured facts, while also indexing raw text for detailed context.</p>
+                    
+                    <h4>How It Works</h4>
+                    <p>The system first uses the knowledge graph to understand the query and identify relevant concepts. Then it retrieves detailed text passages for comprehensive answers.</p>
+                    
+                    <h4>Example: Complex Patient Case</h4>
+                    <p><strong>Question:</strong> "What are the treatment options for a 65-year-old diabetic patient with kidney disease and heart failure?"</p>
+                    <p><strong>Hybrid Approach:</strong></p>
+                    <ul>
+                        <li><strong>Graph Reasoning:</strong> Identifies drug interactions and contraindications</li>
+                        <li><strong>Text Retrieval:</strong> Finds detailed dosing protocols and monitoring guidelines</li>
+                        <li><strong>Combined Answer:</strong> "Avoid metformin (kidney risk), consider SGLT2 inhibitors (cardio-protective), monitor kidney function monthly"</li>
+                    </ul>
+                    
+                    <p><strong>Best for:</strong> Complex patient cases, multi-morbidity scenarios, comprehensive clinical decision support</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('graphrag-approaches', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot active" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('graphrag-approaches', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
         <!-- Knowledge Graphs Visualization -->
         <section id="knowledge-graphs-viz" class="step">
             <div class="content">

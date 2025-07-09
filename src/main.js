@@ -1421,7 +1421,8 @@ const slideStates = {
   'advanced-retrieval': 0,
   'contextual-refinements': 0,
   'external-tools': 0,
-  'knowledge-graphs-intro': 0
+  'knowledge-graphs-intro': 0,
+  'graphrag-approaches': 0
 }
 
 const slideCounts = {
@@ -1429,7 +1430,8 @@ const slideCounts = {
   'advanced-retrieval': 3,
   'contextual-refinements': 4,
   'external-tools': 5,
-  'knowledge-graphs-intro': 4
+  'knowledge-graphs-intro': 4,
+  'graphrag-approaches': 4
 }
 
 function changeSlide(sectionName, direction) {
