@@ -1594,11 +1594,11 @@ const entityExtractionData = {
 // Question Answering Data
 const questionAnsweringData = {
   question: {
-    text: "What are the treatment options for Covid-19?",
+    text: "What are the general approaches to managing infectious diseases?",
     extractedTags: [
-      { type: 'DISEASE', value: 'Covid-19', description: 'The disease being asked about' },
-      { type: 'TREATMENT_TYPE', value: 'Options', description: 'Looking for treatment alternatives' },
-      { type: 'QUERY_TYPE', value: 'Treatment', description: 'Question is about therapeutic approaches' }
+      { type: 'DISEASE_CATEGORY', value: 'Infectious diseases', description: 'Broad category of diseases' },
+      { type: 'MANAGEMENT_TYPE', value: 'Approaches', description: 'Looking for management strategies' },
+      { type: 'QUERY_TYPE', value: 'Management', description: 'Question is about disease management approaches' }
     ]
   },
   searchPath: [
@@ -1617,7 +1617,7 @@ const questionAnsweringData = {
   // Enhanced answer refinement data
   answerRefinement: {
     chunkLevel: {
-      answer: "Treatment options for Covid-19 include Remdesivir (antiviral drug) and respiratory disease management approaches.",
+      answer: "Specific infectious disease treatments include antiviral medications like Remdesivir and targeted respiratory disease management.",
       graphNodes: ['covid19', 'remdesivir', 'respiratory'],
       graphLinks: [
         { source: 'remdesivir', target: 'covid19', label: 'treats' },
@@ -1625,11 +1625,11 @@ const questionAnsweringData = {
       ]
     },
     level1: {
-      answer: "Infectious disease management approaches include antiviral therapy and respiratory medicine treatments.",
+      answer: "Infectious disease management involves antiviral therapy, respiratory medicine, and specialized clinical care approaches.",
       metaTags: ['DISEASE_CATEGORY', 'TREATMENT_APPROACH', 'CLINICAL_FOCUS']
     },
     level2: {
-      answer: "Clinical therapeutics for disease management involve treatment optimization and patient care approaches.",
+      answer: "Clinical therapeutics for disease management encompass comprehensive treatment strategies, patient care optimization, and evidence-based healthcare approaches.",
       metaTags: ['MEDICAL_DOMAIN', 'PATIENT_CARE', 'HEALTHCARE_FOCUS']
     }
   }
@@ -2767,7 +2767,7 @@ function createGraphTaggingViz() {
   svg.selectAll('*').remove();
   
   const width = 420;
-  const height = 480;
+  const height = 520;
   const margin = { top: 20, right: 20, bottom: 20, left: 20 };
   const chartWidth = width - margin.left - margin.right;
   const chartHeight = height - margin.top - margin.bottom;
@@ -3144,7 +3144,7 @@ function createQuestionAnsweringViz() {
   svg.selectAll('*').remove();
   
   const width = 420;
-  const height = 480;
+  const height = 520;
   const margin = { top: 20, right: 20, bottom: 20, left: 20 };
   const chartWidth = width - margin.left - margin.right;
   const chartHeight = height - margin.top - margin.bottom;
