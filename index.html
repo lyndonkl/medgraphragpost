@@ -1,0 +1,1751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GraphRAG & MedGraphRAG: A Survey and Medical Implementation</title>
+    <style>
+        /* ... existing code ... */
+        .paragraphs-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .paragraph-card {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            padding: 12px 16px;
+            font-size: 1rem;
+            color: #222;
+            border: 1px solid #e0e0e0;
+            margin-bottom: 0;
+        }
+        .chunk-group {
+            border: 2px dashed #bdbdbd;
+            border-radius: 10px;
+            padding: 8px 0 8px 0;
+            margin-bottom: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .chunk-a {
+            background: #e3f2fd;
+            border-color: #64b5f6;
+        }
+        .chunk-b {
+            background: #f3e5f5;
+            border-color: #ba68c8;
+        }
+        /* ... existing code ... */
+        .section-header {
+            color: #1976d2;
+            font-size: 2rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 32px;
+            margin-top: 0;
+        }
+        
+        /* Question Answering Styles */
+        .question-panel {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .question-card {
+            background: white;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .question-card p {
+            margin: 0;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        
+        .extracted-tags h4 {
+            margin: 0 0 12px 0;
+            color: #495057;
+            font-size: 14px;
+        }
+        
+        .tag-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .tag {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            color: white;
+        }
+        
+        .tag.disease {
+            background: #dc3545;
+        }
+        
+        .tag.treatment {
+            background: #28a745;
+        }
+        
+        .tag.query {
+            background: #17a2b8;
+        }
+        
+        .tag.matched {
+            background: #ffc107;
+            color: #212529;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+  <script type="module" crossorigin src="/medgraphragpost/assets/index-B58hdxGl.js"></script>
+  <link rel="stylesheet" crossorigin href="/medgraphragpost/assets/index-RrzIYIWH.css">
+</head>
+<body>
+    <main>
+        <!-- Introduction Section -->
+        <section id="intro" class="step">
+            <div class="content">
+                <h1>GraphRAG & MedGraphRAG</h1>
+                <p>A survey of Graph Retrieval-Augmented Generation and its medical implementation for complex question answering</p>
+                <div class="paper-references">
+                    <h3>Based on Research Papers:</h3>
+                    <ul>
+                        <li><strong>A Survey of Graph Retrieval-Augmented Generation for Customized Large Language Models</strong><br>
+                            <a href="https://arxiv.org/pdf/2501.13958" target="_blank">https://arxiv.org/pdf/2501.13958</a></li>
+                        <li><strong>Medical Graph RAG: Towards Safe Medical Large Language Model via Graph Retrieval-Augmented Generation</strong><br>
+                            <a href="https://arxiv.org/pdf/2408.04187" target="_blank">https://arxiv.org/pdf/2408.04187</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Vector Embeddings - Slide 1 -->
+        <section id="embeddings-1" class="step slide-section">
+            <div class="content">
+                <h2>Vector Embeddings</h2>
+                <div class="slide-content">
+                    <h3>What are Embeddings?</h3>
+                    <p>Language models convert words and sentences into mathematical representations that capture semantic meaning.</p>
+                    
+                    <h4>Key Concepts</h4>
+                    <ul>
+                        <li><strong>Numerical Representations:</strong> Text converted to numbers that encode meaning</li>
+                        <li><strong>Semantic Space:</strong> High-dimensional space where similar concepts are positioned close together</li>
+                        <li><strong>Distance = Relationship:</strong> Closer positions indicate stronger semantic similarity</li>
+                        <li><strong>Model Training:</strong> Generated by language models trained on vast text corpora</li>
+                    </ul>
+                    
+                    <p>Think of embeddings as a "semantic map" where related concepts cluster together, just like cities on a geographic map.</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('embeddings', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot active" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('embeddings', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Vector Embeddings - Slide 2 -->
+        <section id="embeddings-2" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Vector Embeddings</h2>
+                <div class="slide-content">
+                    <h3>Medical Semantic Clustering</h3>
+                    <p>The next slide shows an interactive visualization of medical terms in embedding space.</p>
+                    
+                    <h4>What You'll See</h4>
+                    <ul>
+                        <li><strong>Disease Clusters:</strong> Diabetes, heart disease, cancer grouped by medical domain</li>
+                        <li><strong>Treatment Relationships:</strong> Drugs positioned near the conditions they treat</li>
+                        <li><strong>Symptom Associations:</strong> Symptoms clustered with related diseases</li>
+                        <li><strong>Biological Concepts:</strong> Organs, biomarkers, and systems organized by function</li>
+                    </ul>
+                    
+                    <h4>Interactive Features</h4>
+                    <ul>
+                        <li>Hover over points to see term details</li>
+                        <li>Observe how similar medical concepts cluster together</li>
+                        <li>Notice the clear separation between different medical domains</li>
+                    </ul>
+                    
+                    <p><strong>This demonstrates how the model understands medical relationships and can identify semantically similar concepts.</strong></p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('embeddings', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot active" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('embeddings', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Vector Embeddings - Slide 3 (Visualization) -->
+        <section id="embeddings-3" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Vector Embeddings</h2>
+                <p>Interactive visualization of medical terms in semantic space</p>
+            </div>
+            <div class="visualization" id="embeddings-viz"></div>
+            <div class="slide-navigation">
+                <button class="nav-btn prev-btn" onclick="changeSlide('embeddings', -1)">←</button>
+                <div class="progress-dots">
+                    <span class="dot" data-slide="0"></span>
+                    <span class="dot" data-slide="1"></span>
+                    <span class="dot active" data-slide="2"></span>
+                </div>
+                <button class="nav-btn next-btn" onclick="changeSlide('embeddings', 1)">→</button>
+            </div>
+        </section>
+
+        <!-- RAG Section -->
+        <section id="rag" class="step">
+            <div class="content">
+                <h2>What is RAG?</h2>
+                <p>Retrieval-Augmented Generation combines search with language models</p>
+            </div>
+        </section>
+
+        <!-- RAG Explanation Section -->
+        <section id="rag-explanation" class="step">
+            <div class="content">
+                <h2>Why Do We Need RAG?</h2>
+                <div class="explanation-text">
+                    <p>Traditional language models have limitations when answering questions about specific, up-to-date, or domain-specific information. They can:</p>
+                    <ul>
+                        <li><strong>Hallucinate</strong> - make up facts that sound plausible but are incorrect</li>
+                        <li><strong>Be outdated</strong> - not know about recent events or information</li>
+                        <li><strong>Lack domain expertise</strong> - struggle with specialized knowledge</li>
+                    </ul>
+                    <p>RAG solves these problems by:</p>
+                    <ul>
+                        <li><strong>Retrieving</strong> relevant information from a knowledge base</li>
+                        <li><strong>Augmenting</strong> the language model with this retrieved context</li>
+                        <li><strong>Generating</strong> accurate, grounded responses</li>
+                    </ul>
+                    <p>This creates more reliable, factual, and up-to-date answers.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- RAG Visualization Section -->
+        <section id="rag-viz-section" class="step">
+            <div class="content">
+                <h2>How RAG Works</h2>
+                <p>See the RAG process in action with a real document and query</p>
+            </div>
+            <div class="visualization" id="rag-viz"></div>
+        </section>
+
+        <!-- Limitations Section -->
+        <section id="limitations" class="step">
+            <div class="content">
+                <h2>Limitations of Traditional RAG</h2>
+                <p>Why simple vector search falls short for complex medical queries</p>
+            </div>
+        </section>
+
+        <!-- Complex Query Understanding -->
+        <section id="complex-queries" class="step">
+            <div class="content">
+                <h2>Complex Query Understanding</h2>
+                <div class="explanation-text">
+                    <p>Traditional RAG struggles with multi-step reasoning questions that require connecting multiple pieces of information.</p>
+                    <p><strong>Example:</strong> "What are the long-term complications of diabetes in patients who don't respond well to insulin therapy?"</p>
+                    <p>This query requires understanding:</p>
+                    <ul>
+                        <li>What diabetes complications exist</li>
+                        <li>Which patients don't respond to insulin</li>
+                        <li>How these two factors interact</li>
+                        <li>The temporal aspect of "long-term"</li>
+                    </ul>
+                    <p>Simple vector similarity might retrieve chunks about diabetes complications OR insulin resistance, but fails to connect these concepts or understand the conditional relationship.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Distributed Knowledge -->
+        <section id="distributed-knowledge" class="step">
+            <div class="content">
+                <h2>Distributed Domain Knowledge</h2>
+                <div class="explanation-text">
+                    <p>Medical information is often scattered across multiple documents, requiring the system to understand relationships between concepts that appear in different contexts.</p>
+                    <p><strong>Example:</strong> Understanding drug interactions requires connecting information from:</p>
+                    <ul>
+                        <li>Individual drug monographs</li>
+                        <li>Clinical trial reports</li>
+                        <li>Case studies</li>
+                        <li>Pharmacokinetic databases</li>
+                    </ul>
+                    <p>A query about "warfarin and vitamin K interactions" might find relevant chunks in separate documents about anticoagulants, nutrition, and drug metabolism, but traditional RAG cannot establish the causal relationships between these isolated pieces of information.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Context Window Limitations -->
+        <section id="context-limitations" class="step">
+            <div class="content">
+                <h2>Fixed Context Window Constraints</h2>
+                <div class="explanation-text">
+                    <p>LLMs have limited "short-term memory" - their context window can only hold so much information at once. Traditional RAG often fills this precious space with irrelevant or redundant content.</p>
+                    <p><strong>Example:</strong> When answering "What's the recommended dosage for metformin in elderly patients with kidney disease?"</p>
+                    <p>Vector search might retrieve:</p>
+                    <ul>
+                        <li>General metformin information (relevant)</li>
+                        <li>Dosage guidelines for healthy adults (partially relevant)</li>
+                        <li>Kidney disease treatment protocols (relevant)</li>
+                        <li>Diabetes management overview (redundant)</li>
+                        <li>Metformin side effects in young patients (irrelevant)</li>
+                    </ul>
+                    <p>This wastes context space on information that doesn't directly answer the specific question, reducing the model's ability to focus on the most relevant details.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Efficiency and Scalability -->
+        <section id="efficiency-scalability" class="step">
+            <div class="content">
+                <h2>Efficiency and Scalability Issues</h2>
+                <div class="explanation-text">
+                    <p>Flat vector stores require searching through the entire document collection for every query, which becomes computationally expensive and slow as the knowledge base grows.</p>
+                    <p><strong>Example:</strong> In a medical knowledge base with 100,000 documents:</p>
+                    <ul>
+                        <li>Every query must compute similarity with all 100,000 document chunks</li>
+                        <li>No intelligent filtering or hierarchical organization</li>
+                        <li>Search time grows linearly with database size</li>
+                        <li>Cannot leverage domain-specific knowledge to narrow search scope</li>
+                    </ul>
+                    <p>This brute-force approach becomes impractical for real-time medical applications where speed and accuracy are critical for patient care decisions.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Advanced RAG Solutions -->
+        <section id="advanced-rag" class="step">
+            <div class="content">
+                <h2>Advanced RAG Solutions</h2>
+                <p>How modern systems overcome traditional RAG limitations</p>
+            </div>
+        </section>
+
+        <!-- Smarter Chunking & Indexing - Slide 1 -->
+        <section id="smarter-chunking-1" class="step slide-section">
+            <div class="content">
+                <h2>Smarter Chunking & Indexing</h2>
+                <div class="slide-content">
+                    <h3>Recursive Splits</h3>
+                    <p>Instead of fixed-size chunks, documents are split intelligently based on semantic boundaries and then further subdivided when needed.</p>
+                    <p><strong>Example:</strong> A medical research paper might be split into:</p>
+                    <ul>
+                        <li>Abstract (high-level summary)</li>
+                        <li>Introduction (background context)</li>
+                        <li>Methods (procedural details)</li>
+                        <li>Results (findings and data)</li>
+                        <li>Discussion (interpretation and implications)</li>
+                    </ul>
+                    <p>Each section can be further split into paragraphs or sentences based on topic shifts.</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('smarter-chunking', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot active" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('smarter-chunking', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Smarter Chunking & Indexing - Slide 2 -->
+        <section id="smarter-chunking-2" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Smarter Chunking & Indexing</h2>
+                <div class="slide-content">
+                    <h3>Small-to-Big Retrieval</h3>
+                    <p>Start with small, specific chunks and expand to larger context when needed for comprehensive understanding.</p>
+                    <p><strong>Example:</strong> For "diabetes medication side effects":</p>
+                    <ul>
+                        <li>First retrieve: specific side effect descriptions</li>
+                        <li>Then expand to: dosage guidelines and monitoring protocols</li>
+                        <li>Finally include: patient case studies and clinical recommendations</li>
+                    </ul>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('smarter-chunking', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot active" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('smarter-chunking', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Smarter Chunking & Indexing - Slide 3 -->
+        <section id="smarter-chunking-3" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Smarter Chunking & Indexing</h2>
+                <div class="slide-content">
+                    <h3>Metadata Tagging</h3>
+                    <p>Enrich chunks with structured metadata to enable more precise retrieval.</p>
+                    <p><strong>Example:</strong> A chunk about insulin therapy might be tagged with:</p>
+                    <ul>
+                        <li>Topic: "diabetes treatment"</li>
+                        <li>Drug: "insulin"</li>
+                        <li>Population: "elderly patients"</li>
+                        <li>Evidence level: "clinical trial"</li>
+                        <li>Publication date: "2023"</li>
+                    </ul>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('smarter-chunking', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot active" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('smarter-chunking', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Smarter Chunking & Indexing - Slide 4 -->
+        <section id="smarter-chunking-4" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Smarter Chunking & Indexing</h2>
+                <div class="slide-content">
+                    <h3>Hierarchical Summaries</h3>
+                    <p>Create multi-level summaries that allow quick navigation from overview to details.</p>
+                    <p><strong>Example:</strong> A diabetes management document might have:</p>
+                    <ul>
+                        <li>Level 1: "Diabetes requires lifestyle changes and medication"</li>
+                        <li>Level 2: "Medication options include insulin and oral agents"</li>
+                        <li>Level 3: "Insulin types: rapid-acting, long-acting, mixed"</li>
+                        <li>Level 4: Detailed dosing protocols for each type</li>
+                    </ul>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('smarter-chunking', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot active" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('smarter-chunking', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Advanced Retrieval Strategies - Slide 1 -->
+        <section id="advanced-retrieval-1" class="step slide-section">
+            <div class="content">
+                <h2>Advanced Retrieval Strategies</h2>
+                <div class="slide-content">
+                    <h3>Query Expansion</h3>
+                    <p>Rephrase and expand the original query to capture related concepts and terminology.</p>
+                    <p><strong>Example:</strong> Original query: "heart attack symptoms"</p>
+                    <p>Expanded to include:</p>
+                    <ul>
+                        <li>"myocardial infarction signs"</li>
+                        <li>"chest pain and cardiac events"</li>
+                        <li>"acute coronary syndrome symptoms"</li>
+                        <li>"cardiac emergency warning signs"</li>
+                    </ul>
+                    <p>This captures medical terminology variations and related concepts that might not appear in the original query.</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('advanced-retrieval', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot active" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('advanced-retrieval', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Advanced Retrieval Strategies - Slide 2 -->
+        <section id="advanced-retrieval-2" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Advanced Retrieval Strategies</h2>
+                <div class="slide-content">
+                    <h3>Re-ranking Retrieved Results</h3>
+                    <p>Use more sophisticated algorithms to reorder initial retrieval results based on relevance, recency, and authority.</p>
+                    <p><strong>Example:</strong> For "COVID-19 treatment guidelines":</p>
+                    <ul>
+                        <li>Initial retrieval: 20 chunks about COVID-19</li>
+                        <li>Re-ranking factors:</li>
+                        <ul>
+                            <li>Publication date (prefer recent guidelines)</li>
+                            <li>Source authority (CDC, WHO, major medical journals)</li>
+                            <li>Specificity to treatment (not just general COVID info)</li>
+                            <li>Evidence quality (clinical trials vs. case reports)</li>
+                        </ul>
+                        <li>Final selection: 5 most relevant, authoritative chunks</li>
+                    </ul>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('advanced-retrieval', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot active" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('advanced-retrieval', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Advanced Retrieval Strategies - Slide 3 -->
+        <section id="advanced-retrieval-3" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Advanced Retrieval Strategies</h2>
+                <div class="slide-content">
+                    <h3>Multi-Vector Retrieval</h3>
+                    <p>Use different embedding models for different aspects of the query.</p>
+                    <p><strong>Example:</strong> For "diabetes complications in elderly patients":</p>
+                    <ul>
+                        <li>Clinical embeddings: for medical terminology</li>
+                        <li>Demographic embeddings: for age-related factors</li>
+                        <li>Temporal embeddings: for progression and long-term effects</li>
+                        <li>Combine results for comprehensive coverage</li>
+                    </ul>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('advanced-retrieval', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot active" data-slide="2"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('advanced-retrieval', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contextual Refinements - Slide 1 -->
+        <section id="contextual-refinements-1" class="step slide-section">
+            <div class="content">
+                <h2>Contextual Refinements</h2>
+                <div class="slide-content">
+                    <h3>Filtering Irrelevant Chunks</h3>
+                    <p>Remove or downweight information that doesn't directly contribute to answering the query.</p>
+                    <p><strong>Example:</strong> For "metformin dosage in kidney disease":</p>
+                    <ul>
+                        <li>Keep: dosage guidelines, kidney function considerations, monitoring protocols</li>
+                        <li>Filter out: general diabetes overview, metformin history, unrelated side effects</li>
+                        <li>Result: Focused context that directly addresses the specific question</li>
+                    </ul>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('contextual-refinements', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot active" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('contextual-refinements', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contextual Refinements - Slide 2 -->
+        <section id="contextual-refinements-2" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Contextual Refinements</h2>
+                <div class="slide-content">
+                    <h3>Information Compression</h3>
+                    <p>Condense retrieved information while preserving essential details.</p>
+                    <p><strong>Example:</strong> Original chunk: "Metformin is typically started at 500mg twice daily with meals, and can be titrated up to 2550mg daily in divided doses. In patients with reduced kidney function (eGFR &lt; 30), metformin should be avoided due to risk of lactic acidosis."</p>
+                    <p>Compressed to: "Metformin: 500mg bid, max 2550mg/day. Avoid if eGFR &lt; 30."</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('contextual-refinements', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot active" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('contextual-refinements', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contextual Refinements - Slide 3 -->
+        <section id="contextual-refinements-3" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Contextual Refinements</h2>
+                <div class="slide-content">
+                    <h3>Self-Critique by the LLM</h3>
+                    <p>Have the LLM evaluate its own retrieved context for relevance and completeness.</p>
+                    <p><strong>Example:</strong> The LLM might ask itself:</p>
+                    <ul>
+                        <li>"Does this context contain the specific dosage information requested?"</li>
+                        <li>"Are there any gaps in the information that need additional retrieval?"</li>
+                        <li>"Is this information current and from reliable sources?"</li>
+                        <li>"Does this context address all aspects of the query?"</li>
+                    </ul>
+                    <p>If gaps are identified, the system can perform additional targeted retrievals.</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('contextual-refinements', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot active" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('contextual-refinements', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contextual Refinements - Slide 4 -->
+        <section id="contextual-refinements-4" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Contextual Refinements</h2>
+                <div class="slide-content">
+                    <h3>Contextual Relevance Scoring</h3>
+                    <p>Score each piece of retrieved information based on its relevance to the specific query.</p>
+                    <p><strong>Example:</strong> For "warfarin and vitamin K interactions":</p>
+                    <ul>
+                        <li>Score 0.9: Direct information about warfarin-vitamin K mechanism</li>
+                        <li>Score 0.7: General warfarin dosing guidelines</li>
+                        <li>Score 0.5: Vitamin K dietary sources</li>
+                        <li>Score 0.2: Unrelated anticoagulant information</li>
+                    </ul>
+                    <p>Only include chunks with scores above a threshold (e.g., 0.6).</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('contextual-refinements', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot active" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('contextual-refinements', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- External Tools & APIs - Slide 1 -->
+        <section id="external-tools-1" class="step slide-section">
+            <div class="content">
+                <h2>Integrating External Tools & APIs</h2>
+                <div class="slide-content">
+                    <h3>Search Engine Integration</h3>
+                    <p>Augment local knowledge with current information from the web.</p>
+                    <p><strong>Example:</strong> For "latest COVID-19 treatment guidelines":</p>
+                    <ul>
+                        <li>Local knowledge: General COVID-19 information from 2022</li>
+                        <li>Web search: Current CDC, WHO, and FDA guidelines</li>
+                        <li>Result: Combines foundational knowledge with up-to-date recommendations</li>
+                    </ul>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('external-tools', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot active" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                        <span class="dot" data-slide="4"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('external-tools', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- External Tools & APIs - Slide 2 -->
+        <section id="external-tools-2" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Integrating External Tools & APIs</h2>
+                <div class="slide-content">
+                    <h3>Medical Database APIs</h3>
+                    <p>Connect to specialized medical databases for authoritative information.</p>
+                    <p><strong>Example:</strong> For "drug interaction with patient's current medications":</p>
+                    <ul>
+                        <li>UMLS (Unified Medical Language System): For medical terminology</li>
+                        <li>DrugBank: For comprehensive drug information</li>
+                        <li>PubMed: For latest research findings</li>
+                        <li>ClinicalTrials.gov: For ongoing studies</li>
+                    </ul>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('external-tools', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot active" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                        <span class="dot" data-slide="4"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('external-tools', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- External Tools & APIs - Slide 3 -->
+        <section id="external-tools-3" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Integrating External Tools & APIs</h2>
+                <div class="slide-content">
+                    <h3>Real-Time Data Sources</h3>
+                    <p>Access current information that changes frequently.</p>
+                    <p><strong>Example:</strong> For "current flu season recommendations":</p>
+                    <ul>
+                        <li>CDC flu activity maps</li>
+                        <li>Local health department alerts</li>
+                        <li>Vaccine availability information</li>
+                        <li>Regional outbreak data</li>
+                    </ul>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('external-tools', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot active" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                        <span class="dot" data-slide="4"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('external-tools', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- External Tools & APIs - Slide 4 -->
+        <section id="external-tools-4" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Integrating External Tools & APIs</h2>
+                <div class="slide-content">
+                    <h3>Specialized Medical Tools</h3>
+                    <p>Integrate with clinical decision support systems and calculators.</p>
+                    <p><strong>Example:</strong> For "calculate warfarin dose for patient with specific factors":</p>
+                    <ul>
+                        <li>INR calculator based on patient's lab values</li>
+                        <li>Drug interaction checker</li>
+                        <li>Renal function calculator</li>
+                        <li>Age-adjusted dosing recommendations</li>
+                    </ul>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('external-tools', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot active" data-slide="3"></span>
+                        <span class="dot" data-slide="4"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('external-tools', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- External Tools & APIs - Slide 5 -->
+        <section id="external-tools-5" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Integrating External Tools & APIs</h2>
+                <div class="slide-content">
+                    <h3>Quality Control and Verification</h3>
+                    <p>Ensure external information meets quality standards before integration.</p>
+                    <p><strong>Example:</strong> When retrieving from multiple sources:</p>
+                    <ul>
+                        <li>Cross-reference information across authoritative sources</li>
+                        <li>Check publication dates and evidence levels</li>
+                        <li>Verify source credibility and conflicts of interest</li>
+                        <li>Flag conflicting information for human review</li>
+                    </ul>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('external-tools', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                        <span class="dot active" data-slide="4"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('external-tools', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Knowledge Graphs Introduction - Slide 1 -->
+        <section id="knowledge-graphs-intro-1" class="step slide-section">
+            <div class="content">
+                <h2>Knowledge Graphs</h2>
+                <div class="slide-content">
+                    <h3>What are Knowledge Graphs?</h3>
+                    <p>Knowledge graphs are structured representations of information that connect concepts through meaningful relationships. Unlike traditional databases that store isolated facts, knowledge graphs capture the rich web of connections between entities, enabling more sophisticated reasoning and discovery.</p>
+                    
+                    <h4>Core Components</h4>
+                    <p><strong>Nodes (Entities):</strong> Represent real-world objects, concepts, or ideas. In medical contexts, these could be diseases, drugs, symptoms, procedures, or patients.</p>
+                    <p><strong>Edges (Relationships):</strong> Define how entities are connected. These relationships carry semantic meaning, such as "treats," "causes," "contraindicated for," or "monitored by."</p>
+                    <p><strong>Properties:</strong> Additional attributes that describe entities or relationships, such as dosage information, side effects, or evidence levels.</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('knowledge-graphs-intro', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot active" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('knowledge-graphs-intro', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Knowledge Graphs Introduction - Slide 2 -->
+        <section id="knowledge-graphs-intro-2" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Knowledge Graphs</h2>
+                <div class="slide-content">
+                    <h3>What is GraphRAG?</h3>
+                    <p>GraphRAG is RAG supercharged by knowledge graphs. Instead of retrieving isolated text chunks, it retrieves interconnected information that enables deeper understanding and reasoning.</p>
+                    
+                    <h4>How GraphRAG Works</h4>
+                    <p><strong>Interconnected Retrieval:</strong> When you ask "What are the side effects of metformin for diabetic patients with kidney disease?", GraphRAG doesn't just find separate chunks about metformin, diabetes, and kidney disease. It follows the connections between these concepts to provide a complete picture.</p>
+                    
+                    <p><strong>Example Query Path:</strong></p>
+                    <ul>
+                        <li>Find: Metformin → treats → Diabetes</li>
+                        <li>Find: Metformin → contraindicated in → Kidney Disease</li>
+                        <li>Find: Diabetes → complicates → Kidney Disease</li>
+                        <li>Result: Comprehensive understanding of the patient's situation</li>
+                    </ul>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('knowledge-graphs-intro', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot active" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('knowledge-graphs-intro', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Knowledge Graphs Introduction - Slide 3 -->
+        <section id="knowledge-graphs-intro-3" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Knowledge Graphs</h2>
+                <div class="slide-content">
+                    <h3>Enhanced Knowledge Representation & Context</h3>
+                    <p>Knowledge graphs capture complex relationships, not just keywords, directly addressing traditional RAG's weak points.</p>
+                    
+                    <h4>Complex Query Understanding</h4>
+                    <p><strong>Traditional RAG Problem:</strong> "What drug interactions should I worry about for a diabetic patient on metformin with kidney disease?" might retrieve separate chunks about metformin, diabetes, and kidney disease, but miss the crucial connection that metformin is contraindicated in severe kidney disease.</p>
+                    
+                    <p><strong>GraphRAG Solution:</strong> The knowledge graph explicitly connects these concepts, ensuring the system understands that kidney disease affects metformin safety, not just that both conditions exist separately.</p>
+                    
+                    <h4>Distributed Knowledge</h4>
+                    <p><strong>Example:</strong> Information about drug interactions might be scattered across multiple documents. GraphRAG can traverse connections to find that metformin + kidney disease = risk, even if this specific combination isn't mentioned in a single document.</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('knowledge-graphs-intro', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot active" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('knowledge-graphs-intro', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Knowledge Graphs Introduction - Slide 4 -->
+        <section id="knowledge-graphs-intro-4" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Knowledge Graphs</h2>
+                <div class="slide-content">
+                    <h3>Improved Reasoning & Efficiency</h3>
+                    <p>GraphRAG enables multi-hop logic and focused retrieval, solving traditional RAG's reasoning and efficiency problems.</p>
+                    
+                    <h4>Multi-Hop Reasoning</h4>
+                    <p><strong>Example Query:</strong> "What monitoring is needed for a diabetic patient starting metformin?"</p>
+                    <p><strong>GraphRAG Path:</strong></p>
+                    <ul>
+                        <li>Diabetes → requires → Blood Glucose Monitoring</li>
+                        <li>Kidney Disease → requires → Kidney Function Tests</li>
+                        <li>SGLT2 Inhibitors → can cause → Ketoacidosis</li>
+                        <li>Therefore: Monitor glucose, kidney function, AND ketone levels</li>
+                    </ul>
+                    
+                    <h4>Focused Retrieval</h4>
+                    <p><strong>Traditional RAG:</strong> Might retrieve 20 chunks about diabetes, metformin, and kidney disease, overwhelming the LLM's context window.</p>
+                    <p><strong>GraphRAG:</strong> Follows specific paths to retrieve only the 3-5 most relevant interconnected pieces of information.</p>
+                    
+                    <h4>Interpretability</h4>
+                    <p>The reasoning path can be visualized: "We checked kidney function because metformin is contraindicated in kidney disease, and diabetes can cause kidney disease." This makes the AI's decision-making process transparent and understandable.</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('knowledge-graphs-intro', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot active" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('knowledge-graphs-intro', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Knowledge Graphs Visualization -->
+        <section id="knowledge-graphs-viz" class="step">
+            <div class="content">
+                <h2>Medical Knowledge Graph</h2>
+                <p>Interactive visualization of medical concepts and their relationships</p>
+            </div>
+            <div class="visualization" id="knowledge-graph-viz"></div>
+        </section>
+
+        <!-- GraphRAG Approaches - Slide 1 -->
+        <section id="graphrag-approaches-1" class="step slide-section">
+            <div class="content">
+                <h2>GraphRAG Approaches</h2>
+                <div class="slide-content">
+                    <h3>Different Ways to Build GraphRAG</h3>
+                    <p>GraphRAG isn't one-size-fits-all. Different approaches serve different needs, from simple knowledge lookup to complex reasoning systems.</p>
+                    
+                    <h4>Three Main Approaches</h4>
+                    <ul>
+                        <li><strong>Knowledge-Based GraphRAG:</strong> The graph IS the knowledge</li>
+                        <li><strong>Index-Based GraphRAG:</strong> The graph helps FIND knowledge</li>
+                        <li><strong>Hybrid GraphRAG:</strong> Combines both approaches</li>
+                    </ul>
+                    
+                    <p>Each approach has different strengths and is suited for different types of medical questions and data sources.</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('graphrag-approaches', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot active" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('graphrag-approaches', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- GraphRAG Approaches - Slide 2 -->
+        <section id="graphrag-approaches-2" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>GraphRAG Approaches</h2>
+                <div class="slide-content">
+                    <h3>Knowledge-Based GraphRAG</h3>
+                    <p><strong>Core Idea:</strong> The graph is the primary source of knowledge. Facts and relationships are directly encoded in the graph structure.</p>
+                    
+                    <h4>How It Works</h4>
+                    <p>Instead of storing knowledge as text chunks, the system stores it as structured relationships. When you ask a question, the system traverses these relationships to find answers.</p>
+                    
+                    <h4>Example: Drug Interaction Lookup</h4>
+                    <p><strong>Question:</strong> "Can a patient with kidney disease take metformin?"</p>
+                    <p><strong>Graph Traversal:</strong></p>
+                    <ul>
+                        <li>Find: Metformin → contraindicated in → Kidney Disease</li>
+                        <li>Find: Kidney Disease → severity levels → eGFR thresholds</li>
+                        <li>Result: "Metformin contraindicated if eGFR &lt; 30"</li>
+                    </ul>
+                    
+                    <p><strong>Best for:</strong> Factual queries, structured medical knowledge, regulatory information</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('graphrag-approaches', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot active" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('graphrag-approaches', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- GraphRAG Approaches - Slide 3 -->
+        <section id="graphrag-approaches-3" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>GraphRAG Approaches</h2>
+                <div class="slide-content">
+                    <h3>Index-Based GraphRAG</h3>
+                    <p><strong>Core Idea:</strong> The graph acts as a smart index over your raw text documents. It helps find the right text chunks more effectively.</p>
+                    
+                    <h4>How It Works</h4>
+                    <p>The graph represents relationships between text chunks or concepts. When you ask a question, the system uses the graph to identify the most relevant text passages, then retrieves and processes those chunks.</p>
+                    
+                    <h4>Example: Clinical Guideline Search</h4>
+                    <p><strong>Question:</strong> "What's the latest treatment protocol for diabetic patients with heart disease?"</p>
+                    <p><strong>Graph-Assisted Retrieval:</strong></p>
+                    <ul>
+                        <li>Graph identifies: Diabetes + Heart Disease + Treatment concepts</li>
+                        <li>Finds connected text chunks from guidelines</li>
+                        <li>Retrieves: "ADA 2023 guidelines, section 9.4: Cardiovascular disease management"</li>
+                        <li>LLM processes the retrieved text for final answer</li>
+                    </ul>
+                    
+                    <p><strong>Best for:</strong> Complex clinical scenarios, research papers, detailed treatment protocols</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('graphrag-approaches', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot active" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('graphrag-approaches', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- GraphRAG Approaches - Slide 4 -->
+        <section id="graphrag-approaches-4" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>GraphRAG Approaches</h2>
+                <div class="slide-content">
+                    <h3>Hybrid GraphRAG</h3>
+                    <p><strong>Core Idea:</strong> Combines both approaches. Uses a knowledge graph for high-level reasoning and structured facts, while also indexing raw text for detailed context.</p>
+                    
+                    <h4>How It Works</h4>
+                    <p>The system first uses the knowledge graph to understand the query and identify relevant concepts. Then it retrieves detailed text passages for comprehensive answers.</p>
+                    
+                    <h4>Example: Complex Patient Case</h4>
+                    <p><strong>Question:</strong> "What are the treatment options for a 65-year-old diabetic patient with kidney disease and heart failure?"</p>
+                    <p><strong>Hybrid Approach:</strong></p>
+                    <ul>
+                        <li><strong>Graph Reasoning:</strong> Identifies drug interactions and contraindications</li>
+                        <li><strong>Text Retrieval:</strong> Finds detailed dosing protocols and monitoring guidelines</li>
+                        <li><strong>Combined Answer:</strong> "Avoid metformin (kidney risk), consider SGLT2 inhibitors (cardio-protective), monitor kidney function monthly"</li>
+                    </ul>
+                    
+                    <p><strong>Best for:</strong> Complex patient cases, multi-morbidity scenarios, comprehensive clinical decision support</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('graphrag-approaches', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot active" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('graphrag-approaches', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- GraphRAG Advantages - Slide 1 -->
+        <section id="graphrag-advantages-1" class="step slide-section">
+            <div class="content">
+                <h2>GraphRAG Advantages</h2>
+                <div class="slide-content">
+                    <h3>Why GraphRAG Outperforms Traditional RAG</h3>
+                    <p>GraphRAG demonstrates clear advantages over traditional RAG systems across multiple dimensions, from efficiency to accuracy.</p>
+                    
+                    <h4>Key Performance Improvements</h4>
+                    <ul>
+                        <li><strong>Token Efficiency:</strong> 26% to 97% fewer tokens used</li>
+                        <li><strong>Complex Query Answering:</strong> Superior multi-hop reasoning</li>
+                        <li><strong>Contextual Understanding:</strong> Richer, interconnected context</li>
+                        <li><strong>Scalability:</strong> Better performance at scale</li>
+                    </ul>
+                    
+                    <p>Let's explore each advantage in detail to understand the real-world impact.</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('graphrag-advantages', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot active" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('graphrag-advantages', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- GraphRAG Advantages - Slide 2 -->
+        <section id="graphrag-advantages-2" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>GraphRAG Advantages</h2>
+                <div class="slide-content">
+                    <h3>Significant Token Efficiency</h3>
+                    <p><strong>The Numbers:</strong> GraphRAG responses use 26% to 97% fewer tokens compared to traditional RAG.</p>
+                    
+                    <h4>Real-World Impact</h4>
+                    <ul>
+                        <li><strong>Faster Generation:</strong> Less text to process means quicker response times</li>
+                        <li><strong>Lower Computational Costs:</strong> Reduced token usage directly translates to cost savings</li>
+                        <li><strong>Better Resource Utilization:</strong> More efficient use of context window space</li>
+                    </ul>
+                    
+                    <h4>Medical Example</h4>
+                    <p><strong>Traditional RAG:</strong> "Metformin is an oral diabetes medication that belongs to the biguanide class. It works by decreasing glucose production in the liver and improving insulin sensitivity. The typical starting dose is 500mg twice daily with meals. It can be titrated up to 2550mg daily in divided doses. In patients with reduced kidney function, specifically those with eGFR less than 30, metformin should be avoided due to the risk of lactic acidosis..." (150+ tokens)</p>
+                    
+                    <p><strong>GraphRAG:</strong> "Metformin: Start 500mg bid, max 2550mg/day. Avoid if eGFR &lt; 30." (15 tokens)</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('graphrag-advantages', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot active" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('graphrag-advantages', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- GraphRAG Advantages - Slide 3 -->
+        <section id="graphrag-advantages-3" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>GraphRAG Advantages</h2>
+                <div class="slide-content">
+                    <h3>Superior Complex Query Answering</h3>
+                    <p>GraphRAG excels at multi-hop reasoning and deep domain-specific questions that traditional RAG struggles with.</p>
+                    
+                    <h4>Multi-Hop Reasoning Capability</h4>
+                    <p><strong>Example Query:</strong> "What monitoring is needed for a diabetic patient with kidney disease starting SGLT2 inhibitors?"</p>
+                    
+                    <p><strong>GraphRAG Reasoning Path:</strong></p>
+                    <ul>
+                        <li>Diabetes → requires → Blood Glucose Monitoring</li>
+                        <li>Kidney Disease → requires → Kidney Function Tests</li>
+                        <li>SGLT2 Inhibitors → can cause → Ketoacidosis</li>
+                        <li>Therefore: Monitor glucose, kidney function, AND ketone levels</li>
+                    </ul>
+                    
+                    <h4>Impact</h4>
+                    <p><strong>More Accurate:</strong> Connects related concepts that traditional RAG might miss</p>
+                    <p><strong>Comprehensive:</strong> Provides complete answers to complex medical scenarios</p>
+                    <p><strong>Clinically Relevant:</strong> Understands medical relationships and implications</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('graphrag-advantages', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot active" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('graphrag-advantages', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- GraphRAG Advantages - Slide 4 -->
+        <section id="graphrag-advantages-4" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>GraphRAG Advantages</h2>
+                <div class="slide-content">
+                    <h3>Improved Scalability & Efficiency</h3>
+                    <p>Graph structures enable more efficient querying of large, complex knowledge bases while maintaining performance as data volume grows.</p>
+                    
+                    <h4>Scalability Benefits</h4>
+                    <ul>
+                        <li><strong>Intelligent Filtering:</strong> Graph traversal only explores relevant paths</li>
+                        <li><strong>Hierarchical Organization:</strong> Knowledge is structured for efficient access</li>
+                        <li><strong>Predictable Performance:</strong> Query time doesn't grow linearly with data size</li>
+                        <li><strong>Domain-Specific Optimization:</strong> Medical knowledge is organized for clinical relevance</li>
+                    </ul>
+                    
+                    <h4>Real-World Impact</h4>
+                    <p><strong>Large Knowledge Bases:</strong> Can handle millions of medical concepts efficiently</p>
+                    <p><strong>Real-Time Applications:</strong> Fast enough for clinical decision support</p>
+                    <p><strong>Cost-Effective Scaling:</strong> Better performance per computational dollar</p>
+                    
+                    <h4>Comparison</h4>
+                    <p><strong>Traditional RAG:</strong> Searches entire document collection for every query</p>
+                    <p><strong>GraphRAG:</strong> Follows specific paths through relevant knowledge subgraphs</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('graphrag-advantages', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot active" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('graphrag-advantages', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- MedGraphRAG Introduction - Slide 1 -->
+        <section id="medgraphrag-intro-1" class="step slide-section">
+            <div class="content">
+                <h2>MedGraphRAG</h2>
+                <div class="slide-content">
+                    <h3>Specialized Medical GraphRAG</h3>
+                    <p>Now let's explore a specialized application: <strong>MedGraphRAG</strong>, designed specifically for the medical domain.</p>
+                    
+                    <h4>Primary Goal</h4>
+                    <p>Enhance Large Language Models to generate <strong>evidence-based, safe, and reliable medical responses</strong> that healthcare professionals can trust.</p>
+                    
+                    <h4>Medical Domain Challenges</h4>
+                    <ul>
+                        <li><strong>Precision:</strong> Medical decisions require exact accuracy</li>
+                        <li><strong>Terminology:</strong> Complex medical vocabulary and standards</li>
+                        <li><strong>Evidence:</strong> All responses must be traceable to credible sources</li>
+                        <li><strong>Safety:</strong> Incorrect information can have serious consequences</li>
+                    </ul>
+                    
+                    <p>MedGraphRAG addresses these unique challenges through specialized techniques and medical knowledge integration.</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('medgraphrag-intro', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot active" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('medgraphrag-intro', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- MedGraphRAG Introduction - Slide 2 -->
+        <section id="medgraphrag-intro-2" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>MedGraphRAG</h2>
+                <div class="slide-content">
+                    <h3>Three-Layer Knowledge Architecture</h3>
+                    <p>MedGraphRAG uses a unique three-layer approach to build comprehensive medical knowledge graphs.</p>
+                    
+                    <h4>Layer 1: User Data (Top-Level)</h4>
+                    <p><strong>Example:</strong> Patient's electronic health record (EHR) discussing "managing Type 2 Diabetes with complications"</p>
+                    <ul>
+                        <li>Real patient data and clinical notes</li>
+                        <li>Specific case information and context</li>
+                        <li>Current treatment plans and outcomes</li>
+                    </ul>
+                    
+                    <h4>Layer 2: Credible Sources (Middle-Level)</h4>
+                    <p><strong>Example:</strong> Medical journal or clinical guideline on "advanced treatments for Type 2 Diabetes"</p>
+                    <ul>
+                        <li>Peer-reviewed research papers</li>
+                        <li>Clinical practice guidelines</li>
+                        <li>Evidence-based treatment protocols</li>
+                    </ul>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('medgraphrag-intro', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot active" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('medgraphrag-intro', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- MedGraphRAG Introduction - Slide 3 -->
+        <section id="medgraphrag-intro-3" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>MedGraphRAG</h2>
+                <div class="slide-content">
+                    <h3>Layer 3: Controlled Vocabularies</h3>
+                    <p>The foundation layer provides standardized medical terminology and definitions.</p>
+                    
+                    <h4>Dictionary Layer (Controlled Vocabularies)</h4>
+                    <p><strong>Example:</strong> Definitions from UMLS (Unified Medical Language System) for terms like:</p>
+                    <ul>
+                        <li><strong>Metformin:</strong> "Oral antidiabetic drug that decreases hepatic glucose production"</li>
+                        <li><strong>Neuropathy:</strong> "Disease or dysfunction of one or more peripheral nerves"</li>
+                        <li><strong>eGFR:</strong> "Estimated glomerular filtration rate, measure of kidney function"</li>
+                    </ul>
+                    
+                    <h4>Benefits of This Architecture</h4>
+                    <ul>
+                        <li><strong>Standardization:</strong> Consistent medical terminology across all sources</li>
+                        <li><strong>Traceability:</strong> Every concept links to authoritative definitions</li>
+                        <li><strong>Completeness:</strong> Combines real data, evidence, and standardized terms</li>
+                    </ul>
+                    
+                    <p><strong>Next:</strong> We'll see how MedGraphRAG uses these three layers to build and query medical knowledge graphs.</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('medgraphrag-intro', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot active" data-slide="2"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('medgraphrag-intro', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- MedGraphRAG Graph Construction - Slide 1 -->
+        <section id="graph-construction-1" class="step slide-section">
+            <h2 class="section-header">Graph Construction</h2>
+            <div class="content" style="display: flex; gap: 40px; align-items: flex-start;">
+                <div style="flex: 1; min-width: 320px;">
+                    <div class="slide-content">
+                        <h3>Step 1: Smart Chunking</h3>
+                        <p>We start with a sample document containing five paragraphs. The goal is to group similar paragraphs into coherent chunks for better downstream processing.</p>
+                        <ul>
+                            <li>Paragraphs 1, 2, and 5 discuss <strong>infectious disease and treatment</strong>.</li>
+                            <li>Paragraphs 3 and 4 discuss <strong>hormones and pharmacology</strong>.</li>
+                        </ul>
+                        <p>On the left, see the original paragraphs. On the next slide, watch as similar paragraphs are grouped into chunks.</p>
+                    </div>
+                </div>
+                <div style="flex: 1; min-width: 320px;">
+                    <div class="paragraphs-list">
+                        <div class="paragraph-card">Covid-19 is a respiratory disease that can cause severe illness in some patients.</div>
+                        <div class="paragraph-card">Remdesivir is an antiviral drug used to treat Covid-19 and has shown some effectiveness.</div>
+                        <div class="paragraph-card">Glucocorticoids are hormones that help reduce inflammation in the body.</div>
+                        <div class="paragraph-card">Dexamethasone is a pharmacologic substance classified as a glucocorticoid.</div>
+                        <div class="paragraph-card">Respiratory diseases like Covid-19 may require antiviral and anti-inflammatory treatments.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="slide-navigation">
+                <button class="nav-btn prev-btn" onclick="changeSlide('graph-construction', -1)">←</button>
+                <div class="progress-dots">
+                    <span class="dot active" data-slide="0"></span>
+                    <span class="dot" data-slide="1"></span>
+                    <span class="dot" data-slide="2"></span>
+                </div>
+                <button class="nav-btn next-btn" onclick="changeSlide('graph-construction', 1)">→</button>
+            </div>
+        </section>
+
+        <!-- MedGraphRAG Graph Construction - Slide 2 -->
+        <section id="graph-construction-2" class="step slide-section" style="display: none;">
+            <h2 class="section-header">Graph Construction</h2>
+            <div class="content" style="display: flex; gap: 40px; align-items: flex-start;">
+                <div style="flex: 1; min-width: 320px;">
+                    <div class="slide-content">
+                        <h3>Step 2: Chunk Grouping</h3>
+                        <p>Similar paragraphs are now grouped into two chunks, outlined with dashed boundaries and color-coded for clarity.</p>
+                        <ul>
+                            <li><strong>Chunk A:</strong> Paragraphs 1, 2, 5 (Infectious disease & treatment)</li>
+                            <li><strong>Chunk B:</strong> Paragraphs 3, 4 (Hormones & pharmacology)</li>
+                        </ul>
+                        <p>Chunking helps organize information for more effective entity extraction and graph building.</p>
+                    </div>
+                </div>
+                <div style="flex: 1; min-width: 320px;">
+                    <div class="paragraphs-list">
+                        <div class="chunk-group chunk-a">
+                            <div class="paragraph-card">Covid-19 is a respiratory disease that can cause severe illness in some patients.</div>
+                            <div class="paragraph-card">Remdesivir is an antiviral drug used to treat Covid-19 and has shown some effectiveness.</div>
+                            <div class="paragraph-card">Respiratory diseases like Covid-19 may require antiviral and anti-inflammatory treatments.</div>
+                        </div>
+                        <div class="chunk-group chunk-b">
+                            <div class="paragraph-card">Glucocorticoids are hormones that help reduce inflammation in the body.</div>
+                            <div class="paragraph-card">Dexamethasone is a pharmacologic substance classified as a glucocorticoid.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="slide-navigation">
+                <button class="nav-btn prev-btn" onclick="changeSlide('graph-construction', -1)">←</button>
+                <div class="progress-dots">
+                    <span class="dot" data-slide="0"></span>
+                    <span class="dot active" data-slide="1"></span>
+                    <span class="dot" data-slide="2"></span>
+                </div>
+                <button class="nav-btn next-btn" onclick="changeSlide('graph-construction', 1)">→</button>
+            </div>
+        </section>
+
+        <!-- MedGraphRAG Graph Construction - Slide 3 -->
+        <section id="graph-construction-3" class="step slide-section" style="display: none;">
+            <h2 class="section-header">Graph Construction</h2>
+            <div class="content" style="display: flex; gap: 40px; align-items: stretch;">
+                <div style="flex: 1; min-width: 320px;">
+                    <div class="paragraphs-list" style="margin-top: 0;">
+                        <div class="chunk-group chunk-a">
+                            <div class="paragraph-card">Covid-19 is a respiratory disease that can cause severe illness in some patients.</div>
+                            <div class="paragraph-card">Remdesivir is an antiviral drug used to treat Covid-19 and has shown some effectiveness.</div>
+                            <div class="paragraph-card">Respiratory diseases like Covid-19 may require antiviral and anti-inflammatory treatments.</div>
+                        </div>
+                        <div class="chunk-group chunk-b">
+                            <div class="paragraph-card">Glucocorticoids are hormones that help reduce inflammation in the body.</div>
+                            <div class="paragraph-card">Dexamethasone is a pharmacologic substance classified as a glucocorticoid.</div>
+                        </div>
+                    </div>
+                </div>
+                <div style="flex: 1; min-width: 400px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;">
+                    <div id="graph-construction-entities" style="width: 100%; height: 500px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fafafa; display: flex; align-items: center; justify-content: center;">
+                        <svg id="entity-graph-svg" width="420" height="480"></svg>
+                    </div>
+                    <div id="entity-graph-controls" style="margin-top: 16px; display: flex; gap: 12px;"></div>
+                </div>
+            </div>
+            <div class="slide-navigation">
+                <button class="nav-btn prev-btn" onclick="changeSlide('graph-construction', -1)">←</button>
+                <div class="progress-dots">
+                    <span class="dot" data-slide="0"></span>
+                    <span class="dot" data-slide="1"></span>
+                    <span class="dot active" data-slide="2"></span>
+                </div>
+                <button class="nav-btn next-btn" onclick="changeSlide('graph-construction', 1)">→</button>
+            </div>
+        </section>
+
+        <!-- Overall Graph Structure Section -->
+        <section id="overall-graph-structure" class="step">
+          <h2 class="section-header">Overall Graph Structure</h2>
+          <div style="display: flex; flex-direction: column; align-items: center;">
+            <div id="overall-graph-container" style="width: 820px; height: 620px; background: #fafcff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); position: relative;">
+              <svg id="overall-graph-svg" width="800" height="600"></svg>
+              <button id="overall-graph-back" style="position: absolute; top: 18px; right: 18px; display: none; padding: 8px 18px; font-size: 16px; background: #1976d2; color: #fff; border: none; border-radius: 6px; cursor: pointer;">Back</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Graph Tagging Section -->
+        <section id="graph-tagging" class="step">
+            <h2 class="section-header">Graph Tagging</h2>
+            <div class="content" style="display: flex; gap: 40px; align-items: stretch;">
+                <div style="flex: 1; min-width: 320px;">
+                    <div class="paragraphs-list" style="margin-top: 0;">
+                        <div class="chunk-group chunk-a">
+                            <div class="paragraph-card">Covid-19 is a respiratory disease that can cause severe illness in some patients.</div>
+                            <div class="paragraph-card">Remdesivir is an antiviral drug used to treat Covid-19 and has shown some effectiveness.</div>
+                            <div class="paragraph-card">Respiratory diseases like Covid-19 may require antiviral and anti-inflammatory treatments.</div>
+                        </div>
+                        <div class="chunk-group chunk-b">
+                            <div class="paragraph-card">Glucocorticoids are hormones that help reduce inflammation in the body.</div>
+                            <div class="paragraph-card">Dexamethasone is a pharmacologic substance classified as a glucocorticoid.</div>
+                        </div>
+                    </div>
+                </div>
+                <div style="flex: 1; min-width: 400px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;">
+                    <div id="graph-tagging-viz" style="width: 100%; height: 500px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fafafa; display: flex; align-items: center; justify-content: center;">
+                        <svg id="tag-graph-svg" width="420" height="480"></svg>
+                    </div>
+                    <div id="tag-graph-controls" style="margin-top: 16px; display: flex; gap: 12px;"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Question Answering Section -->
+        <section id="question-answering" class="step">
+            <h2 class="section-header">Question Answering with Tag Tree</h2>
+            <div class="content" style="display: flex; gap: 40px; align-items: stretch;">
+                <div style="flex: 1; min-width: 320px;">
+                    <div class="question-panel">
+                        <h3>Medical Question</h3>
+                        <div class="question-card">
+                            <p><strong>Q:</strong> "What are the general approaches to managing infectious diseases?"</p>
+                        </div>
+                        <div class="extracted-tags">
+                            <h4>Extracted Tags:</h4>
+                            <div class="tag-list">
+                                <span class="tag disease">DISEASE: Covid-19</span>
+                                <span class="tag treatment">TREATMENT_TYPE: Options</span>
+                                <span class="tag query">QUERY_TYPE: Treatment</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div style="flex: 1; min-width: 400px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;">
+                    <div id="question-answering-viz" style="width: 100%; height: 540px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fafafa; display: flex; align-items: center; justify-content: center;">
+                        <svg id="qa-graph-svg" width="420" height="520"></svg>
+                    </div>
+                    <div id="qa-controls" style="margin-top: 16px; display: flex; gap: 12px;"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Performance Results Section -->
+        <section id="performance-results-1" class="step slide-section">
+            <div class="content">
+                <h2>Performance Results</h2>
+                <div class="slide-content">
+                    <h3>Outperforms Baselines</h3>
+                    <p>MedGraphRAG demonstrates consistent accuracy gains across multiple benchmarks:</p>
+                    <ul>
+                        <li><strong>9 medical Q&A benchmarks</strong> + 2 fact-checking benchmarks</li>
+                        <li><strong>~10% gain</strong> vs. no retrieval (fact-checking)</li>
+                        <li><strong>~8% gain</strong> vs. no retrieval (medical Q&A)</li>
+                        <li><strong>~8% gain</strong> vs. GraphRAG (fact-checking)</li>
+                        <li><strong>~5% gain</strong> vs. GraphRAG (medical Q&A)</li>
+                    </ul>
+                    <p>Results validated across multiple models: Llama2, Llama3, Gemini-pro, GPT-4</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('performance-results', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot active" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('performance-results', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Performance Results - Slide 2 -->
+        <section id="performance-results-2" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Performance Results</h2>
+                <div class="slide-content">
+                    <h3>New State-of-the-Art</h3>
+                    <p>MedGraphRAG achieves new SOTA performance with larger models:</p>
+                    <ul>
+                        <li><strong>Surpassed existing SOTA</strong> on all 11 datasets</li>
+                        <li><strong>Outperforms specialized models</strong> like Med-PaLM 2</li>
+                        <li><strong>Superior long-form generation</strong> with better evidence</li>
+                    </ul>
+                    <p>Human evaluation by clinicians and laypersons shows higher ratings for:</p>
+                    <ul>
+                        <li>Pertinence</li>
+                        <li>Correctness</li>
+                        <li>Citation Precision (CP)</li>
+                        <li>Citation Recall (CR)</li>
+                        <li>Understandability</li>
+                    </ul>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('performance-results', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot active" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('performance-results', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Performance Results - Slide 3 -->
+        <section id="performance-results-3" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Performance Results</h2>
+                <div class="slide-content">
+                    <h3>Evidence Quality</h3>
+                    <p>Case studies demonstrate MedGraphRAG's superior evidence-backed answers:</p>
+                    <ul>
+                        <li><strong>More detailed responses</strong> with correct reasoning</li>
+                        <li><strong>Better citation precision</strong> and recall</li>
+                        <li><strong>Improved understandability</strong> for both clinicians and patients</li>
+                    </ul>
+                    <p>Compared to standard GraphRAG, MedGraphRAG provides:</p>
+                    <ul>
+                        <li>More comprehensive medical context</li>
+                        <li>Better integration of multiple data sources</li>
+                        <li>Enhanced reasoning capabilities</li>
+                    </ul>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('performance-results', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot active" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('performance-results', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Performance Results - Slide 4 -->
+        <section id="performance-results-4" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Performance Results</h2>
+                <div class="slide-content">
+                    <h3>Key Modules Drive Performance</h3>
+                    <p>Ablation studies reveal the impact of MedGraphRAG's key components:</p>
+                    <ul>
+                        <li><strong>Triple Graph Construction:</strong> Significantly boosts performance</li>
+                        <li><strong>U-Retrieval:</strong> Enhances retrieval accuracy</li>
+                        <li><strong>Multi-tier repository:</strong> Effective use of medical reports, papers, dictionaries</li>
+                    </ul>
+                    <p>Performance gains over standard GraphRAG:</p>
+                    <ul>
+                        <li>Better integration of heterogeneous data sources</li>
+                        <li>Improved reasoning through graph structure</li>
+                        <li>Enhanced retrieval through hierarchical tagging</li>
+                    </ul>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('performance-results', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot active" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('performance-results', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Conclusion - Slide 1 -->
+        <section id="conclusion-1" class="step slide-section">
+            <div class="content">
+                <h2>Conclusion</h2>
+                <div class="slide-content">
+                    <h3>Traditional RAG's Limitations</h3>
+                    <p>Standard retrieval-augmented generation faces significant challenges in complex domains:</p>
+                    <ul>
+                        <li><strong>Complex Query Understanding:</strong> Struggles with multi-step reasoning and conditional relationships</li>
+                        <li><strong>Distributed Knowledge:</strong> Cannot connect information scattered across multiple documents</li>
+                        <li><strong>LLM Constraints:</strong> Limited context windows waste space on irrelevant content</li>
+                        <li><strong>Scalability Issues:</strong> Linear search time growth with knowledge base size</li>
+                    </ul>
+                    <p>These limitations make traditional RAG inadequate for specialized, knowledge-intensive domains like medicine.</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('conclusion', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot active" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('conclusion', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Conclusion - Slide 2 -->
+        <section id="conclusion-2" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Conclusion</h2>
+                <div class="slide-content">
+                    <h3>GraphRAG as a Solution</h3>
+                    <p>Knowledge graphs provide the missing link for advanced retrieval and reasoning:</p>
+                    <ul>
+                        <li><strong>Richer Context:</strong> Structured relationships enable deeper understanding of concepts</li>
+                        <li><strong>Better Reasoning:</strong> Graph traversal supports multi-hop inference and causal relationships</li>
+                        <li><strong>Focused Retrieval:</strong> Targeted search through relevant subgraphs reduces noise</li>
+                    </ul>
+                    <h4>Flexible Approaches</h4>
+                    <ul>
+                        <li><strong>Knowledge-based:</strong> Leverages existing medical ontologies and relationships</li>
+                        <li><strong>Index-based:</strong> Builds graph indices over traditional document collections</li>
+                        <li><strong>Hybrid:</strong> Combines both approaches for optimal performance</li>
+                    </ul>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('conclusion', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot active" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('conclusion', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Conclusion - Slide 3 -->
+        <section id="conclusion-3" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Conclusion</h2>
+                <div class="slide-content">
+                    <h3>MedGraphRAG: A Case Study in Excellence</h3>
+                    <p>MedGraphRAG demonstrates how tailored GraphRAG can revolutionize specialized domains:</p>
+                    <ul>
+                        <li><strong>State-of-the-Art Performance:</strong> Surpasses existing benchmarks across 11 medical datasets</li>
+                        <li><strong>Safer Medical Insights:</strong> Evidence-based responses with proper citations and reasoning</li>
+                        <li><strong>Enhanced Understandability:</strong> Clear explanations for both clinicians and patients</li>
+                    </ul>
+                    <h4>Key Innovations</h4>
+                    <ul>
+                        <li><strong>Triple Graph Construction:</strong> EHR, research papers, and medical dictionaries create comprehensive knowledge</li>
+                        <li><strong>U-Retrieval:</strong> Hierarchical tag-based retrieval ensures relevant, focused results</li>
+                        <li><strong>Multi-tier Architecture:</strong> Leverages domain-specific medical knowledge effectively</li>
+                    </ul>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('conclusion', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot active" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('conclusion', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Conclusion - Slide 4 -->
+        <section id="conclusion-4" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Conclusion</h2>
+                <div class="slide-content">
+                    <h3>The Path Forward</h3>
+                    <p>Graph-based RAG represents a fundamental shift in how we approach AI-powered knowledge systems:</p>
+                    <ul>
+                        <li><strong>Deeper Understanding:</strong> Structured knowledge enables more sophisticated reasoning</li>
+                        <li><strong>Enhanced Reliability:</strong> Evidence-based responses with traceable sources</li>
+                        <li><strong>Domain Specialization:</strong> Tailored approaches for complex, knowledge-intensive tasks</li>
+                    </ul>
+                    <p><strong>For medicine and beyond, GraphRAG is crucial for unlocking the full potential of large language models in specialized domains.</strong></p>
+                    <p>The combination of structured knowledge, intelligent retrieval, and domain expertise creates systems that are not just more accurate, but more trustworthy and useful.</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('conclusion', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot active" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('conclusion', 1)">→</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+</body>
+</html> 
