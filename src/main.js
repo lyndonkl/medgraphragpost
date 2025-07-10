@@ -1613,6 +1613,25 @@ const questionAnsweringData = {
       { type: 'TREATMENT_TYPE', value: 'Antiviral therapy', description: 'Medication targeting viral replication' }
     ],
     answer: "Based on the retrieved information, treatment options for Covid-19 include antiviral therapy with medications like Remdesivir, which has shown effectiveness in treating the disease."
+  },
+  // Enhanced answer refinement data
+  answerRefinement: {
+    chunkLevel: {
+      answer: "Treatment options for Covid-19 include Remdesivir (antiviral drug) and respiratory disease management approaches.",
+      graphNodes: ['covid19', 'remdesivir', 'respiratory'],
+      graphLinks: [
+        { source: 'remdesivir', target: 'covid19', label: 'treats' },
+        { source: 'covid19', target: 'respiratory', label: 'is a' }
+      ]
+    },
+    level1: {
+      answer: "Infectious disease management approaches include antiviral therapy and respiratory medicine treatments.",
+      metaTags: ['DISEASE_CATEGORY', 'TREATMENT_APPROACH', 'CLINICAL_FOCUS']
+    },
+    level2: {
+      answer: "Clinical therapeutics for disease management involve treatment optimization and patient care approaches.",
+      metaTags: ['MEDICAL_DOMAIN', 'PATIENT_CARE', 'HEALTHCARE_FOCUS']
+    }
   }
 };
 
@@ -3115,7 +3134,9 @@ function setupGraphTaggingControls() {
 // Question Answering Visualization
 let questionAnsweringState = {
   currentStep: 0,
-  searchPath: []
+  searchPath: [],
+  animationPhase: 'search', // 'search', 'graph', 'refinement'
+  currentRefinementLevel: null // 'chunkLevel', 'level1', 'level2'
 };
 
 function createQuestionAnsweringViz() {
@@ -3128,11 +3149,31 @@ function createQuestionAnsweringViz() {
   const chartWidth = width - margin.left - margin.right;
   const chartHeight = height - margin.top - margin.bottom;
   
+  // Add arrowhead marker definition
+  svg.append('defs').append('marker')
+    .attr('id', 'arrowhead')
+    .attr('viewBox', '0 -5 10 10')
+    .attr('refX', 8)
+    .attr('refY', 0)
+    .attr('markerWidth', 6)
+    .attr('markerHeight', 6)
+    .attr('orient', 'auto')
+    .append('path')
+    .attr('d', 'M0,-5L10,0L0,5')
+    .attr('fill', '#666');
+  
   // Create chart group
   const g = svg.append('g')
     .attr('transform', `translate(${margin.left}, ${margin.top})`);
   
-  // Add title
+  // Add title based on animation phase
+  let titleText = 'Tag Tree Search Process';
+  if (questionAnsweringState.animationPhase === 'graph') {
+    titleText = 'Chunk Graph Analysis';
+  } else if (questionAnsweringState.animationPhase === 'refinement') {
+    titleText = 'Answer Refinement Process';
+  }
+  
   g.append('text')
     .attr('x', chartWidth / 2)
     .attr('y', 0)
@@ -3140,10 +3181,16 @@ function createQuestionAnsweringViz() {
     .style('font-size', '16px')
     .style('font-weight', '600')
     .style('fill', '#333')
-    .text('Tag Tree Search Process');
+    .text(titleText);
   
-  // Render the search process
-  renderSearchProcess(g, chartWidth, chartHeight);
+  // Render based on animation phase
+  if (questionAnsweringState.animationPhase === 'search') {
+    renderSearchProcess(g, chartWidth, chartHeight);
+  } else if (questionAnsweringState.animationPhase === 'graph') {
+    renderChunkGraph(g, chartWidth, chartHeight);
+  } else if (questionAnsweringState.animationPhase === 'refinement') {
+    renderAnswerRefinement(g, chartWidth, chartHeight);
+  }
 }
 
 function renderSearchProcess(g, width, height) {
@@ -3276,8 +3323,9 @@ function renderSearchProcess(g, width, height) {
       .attr('stroke-dasharray', '3 2');
   });
   
-  // Add search result info
-  if (questionAnsweringState.searchPath.length > 0) {
+  // Add search result info - only show when we've reached a chunk
+  const hasReachedChunk = questionAnsweringState.searchPath.some(p => p.level === 'chunks');
+  if (hasReachedChunk) {
     g.append('text')
       .attr('x', width / 2)
       .attr('y', height - 30)
@@ -3294,6 +3342,308 @@ function renderSearchProcess(g, width, height) {
       .style('font-size', '11px')
       .style('fill', '#666')
       .text('Contains: Remdesivir, Antiviral therapy');
+  }
+}
+
+function renderChunkGraph(g, width, height) {
+  // Get the chunk graph data from entityExtractionData
+  const chunkANodes = entityExtractionData.nodes.filter(n => n.chunk === 'A');
+  const chunkALinks = entityExtractionData.links.filter(l => 
+    chunkANodes.some(n => n.id === l.source) && chunkANodes.some(n => n.id === l.target)
+  );
+  
+  // Layout positions for the graph
+  const nodePositions = {
+    covid19: { x: width / 2, y: height / 2 - 60 },
+    remdesivir: { x: width / 2 - 80, y: height / 2 },
+    respiratory: { x: width / 2 + 80, y: height / 2 }
+  };
+  
+  const nodeRadius = 25;
+  
+  // Draw links first
+  chunkALinks.forEach(link => {
+    const sourcePos = nodePositions[link.source];
+    const targetPos = nodePositions[link.target];
+    
+    g.append('line')
+      .attr('x1', sourcePos.x)
+      .attr('y1', sourcePos.y)
+      .attr('x2', targetPos.x)
+      .attr('y2', targetPos.y)
+      .attr('stroke', '#666')
+      .attr('stroke-width', 3)
+      .attr('marker-end', 'url(#arrowhead)');
+    
+    // Add link label
+    const midX = (sourcePos.x + targetPos.x) / 2;
+    const midY = (sourcePos.y + targetPos.y) / 2;
+    
+    g.append('text')
+      .attr('x', midX)
+      .attr('y', midY - 5)
+      .attr('text-anchor', 'middle')
+      .style('font-size', '10px')
+      .style('fill', '#666')
+      .style('font-weight', '600')
+      .text(link.label);
+  });
+  
+  // Draw nodes
+  chunkANodes.forEach(node => {
+    const pos = nodePositions[node.id];
+    const nodeColor = entityNodeTypeColors[node.type] || '#666';
+    
+    g.append('circle')
+      .attr('cx', pos.x)
+      .attr('cy', pos.y)
+      .attr('r', nodeRadius)
+      .attr('fill', nodeColor)
+      .attr('fill-opacity', 0.8)
+      .attr('stroke', '#333')
+      .attr('stroke-width', 2)
+      .attr('cursor', 'pointer')
+      .on('mouseover', (event) => showChunkGraphTooltip(event, node))
+      .on('mouseout', hideTooltip);
+    
+    // Add node label
+    g.append('text')
+      .attr('x', pos.x)
+      .attr('y', pos.y + 5)
+      .attr('text-anchor', 'middle')
+      .style('font-size', '11px')
+      .style('font-weight', '600')
+      .style('fill', '#fff')
+      .text(node.acronym)
+      .attr('pointer-events', 'none');
+  });
+  
+  // Add answer text
+  g.append('text')
+    .attr('x', width / 2)
+    .attr('y', height - 60)
+    .attr('text-anchor', 'middle')
+    .style('font-size', '12px')
+    .style('font-weight', '600')
+    .style('fill', '#28a745')
+    .text('Generated Answer:');
+  
+  // Wrap the answer text
+  const wrapText = (text, width, lineHeight = 14) => {
+    const words = text.split(' ');
+    const lines = [];
+    let currentLine = words[0];
+    
+    for (let i = 1; i < words.length; i++) {
+      const word = words[i];
+      const testLine = currentLine + ' ' + word;
+      // Estimate character width (average 6.5px per character for 11px font)
+      const testWidth = testLine.length * 6.5;
+      
+      if (testWidth > width - 20) { // 20px padding
+        lines.push(currentLine);
+        currentLine = word;
+      } else {
+        currentLine = testLine;
+      }
+    }
+    lines.push(currentLine);
+    
+    return lines;
+  };
+  
+  const wrappedLines = wrapText(questionAnsweringData.answerRefinement.chunkLevel.answer, width - 40);
+  const lineHeight = 14;
+  
+  // Draw each line of the wrapped text
+  wrappedLines.forEach((line, i) => {
+    g.append('text')
+      .attr('x', width / 2)
+      .attr('y', height - 40 + (i * lineHeight))
+      .attr('text-anchor', 'middle')
+      .style('font-size', '11px')
+      .style('fill', '#333')
+      .text(line);
+  });
+}
+
+function renderAnswerRefinement(g, width, height) {
+  const nodeRadius = 20;
+  const levelSpacing = 80;
+  const nodeSpacing = 120;
+  
+  // Level 2 (Top) - Medical Therapeutics
+  const level2Meta = graphTaggingData.metaTags.level2[0];
+  const level2X = width / 2;
+  const level2Y = 60;
+  
+  const isLevel2Refined = questionAnsweringState.currentRefinementLevel === 'level2';
+  
+  // Draw level 2 node
+  g.append('circle')
+    .attr('cx', level2X)
+    .attr('cy', level2Y)
+    .attr('r', nodeRadius)
+    .attr('fill', isLevel2Refined ? '#ff9800' : level2Meta.color)
+    .attr('fill-opacity', 0.8)
+    .attr('stroke', isLevel2Refined ? '#e65100' : '#333')
+    .attr('stroke-width', isLevel2Refined ? 3 : 2)
+    .attr('cursor', 'pointer')
+    .on('mouseover', (event) => showRefinementTooltip(event, level2Meta, 'level2'))
+    .on('mouseout', hideTooltip);
+  
+  // Add level 2 label
+  g.append('text')
+    .attr('x', level2X)
+    .attr('y', level2Y + 5)
+    .attr('text-anchor', 'middle')
+    .style('font-size', '12px')
+    .style('font-weight', '600')
+    .style('fill', '#fff')
+    .text('MT')
+    .attr('pointer-events', 'none');
+  
+  // Level 1 (Middle) - Meta tags
+  const level1Metas = graphTaggingData.metaTags.level1;
+  level1Metas.forEach((meta, i) => {
+    const level1X = width / 2 + (i === 0 ? -nodeSpacing/2 : nodeSpacing/2);
+    const level1Y = level2Y + levelSpacing;
+    
+    const isLevel1Refined = questionAnsweringState.currentRefinementLevel === 'level1';
+    
+    // Draw level 1 node
+    g.append('circle')
+      .attr('cx', level1X)
+      .attr('cy', level1Y)
+      .attr('r', nodeRadius)
+      .attr('fill', isLevel1Refined ? '#ff9800' : meta.color)
+      .attr('fill-opacity', 0.8)
+      .attr('stroke', isLevel1Refined ? '#e65100' : '#333')
+      .attr('stroke-width', isLevel1Refined ? 3 : 2)
+      .attr('cursor', 'pointer')
+      .on('mouseover', (event) => showRefinementTooltip(event, meta, 'level1'))
+      .on('mouseout', hideTooltip);
+    
+    // Add level 1 label
+    g.append('text')
+      .attr('x', level1X)
+      .attr('y', level1Y + 5)
+      .attr('text-anchor', 'middle')
+      .style('font-size', '12px')
+      .style('font-weight', '600')
+      .style('fill', '#fff')
+      .text(getAcronym(meta))
+      .attr('pointer-events', 'none');
+    
+    // Draw connection line
+    g.append('line')
+      .attr('x1', level2X)
+      .attr('y1', level2Y + nodeRadius)
+      .attr('x2', level1X)
+      .attr('y2', level1Y - nodeRadius)
+      .attr('stroke', '#666')
+      .attr('stroke-width', 2)
+      .attr('stroke-dasharray', '3 2');
+  });
+  
+  // Level 0 (Bottom) - Chunks
+  const chunks = Object.values(graphTaggingData.chunks);
+  chunks.forEach((chunk, i) => {
+    const chunkX = width / 2 + (i === 0 ? -nodeSpacing/2 : nodeSpacing/2);
+    const chunkY = level2Y + 2 * levelSpacing;
+    
+    const isChunkRefined = questionAnsweringState.currentRefinementLevel === 'chunkLevel';
+    
+    // Draw chunk node
+    g.append('circle')
+      .attr('cx', chunkX)
+      .attr('cy', chunkY)
+      .attr('r', nodeRadius)
+      .attr('fill', isChunkRefined ? '#ff9800' : chunk.color)
+      .attr('fill-opacity', 0.8)
+      .attr('stroke', isChunkRefined ? '#e65100' : '#333')
+      .attr('stroke-width', isChunkRefined ? 3 : 2)
+      .attr('cursor', 'pointer')
+      .on('mouseover', (event) => showRefinementTooltip(event, chunk, 'chunkLevel'))
+      .on('mouseout', hideTooltip);
+    
+    // Add chunk label
+    g.append('text')
+      .attr('x', chunkX)
+      .attr('y', chunkY + 5)
+      .attr('text-anchor', 'middle')
+      .style('font-size', '12px')
+      .style('font-weight', '600')
+      .style('fill', '#fff')
+      .text(getAcronym(chunk))
+      .attr('pointer-events', 'none');
+    
+    // Draw connection line
+    const parentMeta = level1Metas[i];
+    const parentX = width / 2 + (i === 0 ? -nodeSpacing/2 : nodeSpacing/2);
+    const parentY = level2Y + levelSpacing;
+    
+    g.append('line')
+      .attr('x1', parentX)
+      .attr('y1', parentY + nodeRadius)
+      .attr('x2', chunkX)
+      .attr('y2', chunkY - nodeRadius)
+      .attr('stroke', '#666')
+      .attr('stroke-width', 2)
+      .attr('stroke-dasharray', '3 2');
+  });
+  
+  // Add refined answer text
+  if (questionAnsweringState.currentRefinementLevel) {
+    const refinementData = questionAnsweringData.answerRefinement[questionAnsweringState.currentRefinementLevel];
+    
+    g.append('text')
+      .attr('x', width / 2)
+      .attr('y', height - 60)
+      .attr('text-anchor', 'middle')
+      .style('font-size', '12px')
+      .style('font-weight', '600')
+      .style('fill', '#ff9800')
+      .text('Refined Answer:');
+    
+    // Wrap the answer text
+    const wrapText = (text, width, lineHeight = 14) => {
+      const words = text.split(' ');
+      const lines = [];
+      let currentLine = words[0];
+      
+      for (let i = 1; i < words.length; i++) {
+        const word = words[i];
+        const testLine = currentLine + ' ' + word;
+        // Estimate character width (average 6.5px per character for 11px font)
+        const testWidth = testLine.length * 6.5;
+        
+        if (testWidth > width - 20) { // 20px padding
+          lines.push(currentLine);
+          currentLine = word;
+        } else {
+          currentLine = testLine;
+        }
+      }
+      lines.push(currentLine);
+      
+      return lines;
+    };
+    
+    const wrappedLines = wrapText(refinementData.answer, width - 40);
+    const lineHeight = 14;
+    const totalHeight = wrappedLines.length * lineHeight;
+    
+    // Draw each line of the wrapped text
+    wrappedLines.forEach((line, i) => {
+      g.append('text')
+        .attr('x', width / 2)
+        .attr('y', height - 40 + (i * lineHeight))
+        .attr('text-anchor', 'middle')
+        .style('font-size', '11px')
+        .style('fill', '#333')
+        .text(line);
+    });
   }
 }
 
@@ -3340,6 +3690,67 @@ function showSearchTooltip(event, node, isMatched) {
     .style('top', (event.pageY - 10) + 'px');
 }
 
+function showChunkGraphTooltip(event, node) {
+  hideTooltip();
+  const tooltip = d3.select('body').append('div')
+    .attr('class', 'tooltip')
+    .style('position', 'absolute')
+    .style('background', 'rgba(0,0,0,0.92)')
+    .style('color', 'white')
+    .style('padding', '12px 16px')
+    .style('border-radius', '6px')
+    .style('font-size', '13px')
+    .style('pointer-events', 'none')
+    .style('z-index', 1000)
+    .style('box-shadow', '0 2px 8px rgba(0,0,0,0.3)')
+    .style('max-width', '300px');
+  
+  let tooltipContent = `<div style="margin-bottom: 8px;"><strong>${node.label}</strong></div>`;
+  tooltipContent += `<div style="margin-bottom: 4px; color: #90caf9;">Type: ${node.type}</div>`;
+  tooltipContent += `<div style="margin-bottom: 4px; color: #90caf9;">Chunk: ${node.chunk}</div>`;
+  tooltipContent += `<div style="margin-bottom: 4px; color: #b3e5fc; font-style: italic;">${node.context}</div>`;
+  
+  tooltip.html(tooltipContent)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 10) + 'px');
+}
+
+function showRefinementTooltip(event, node, level) {
+  hideTooltip();
+  const tooltip = d3.select('body').append('div')
+    .attr('class', 'tooltip')
+    .style('position', 'absolute')
+    .style('background', 'rgba(0,0,0,0.92)')
+    .style('color', 'white')
+    .style('padding', '12px 16px')
+    .style('border-radius', '6px')
+    .style('font-size', '13px')
+    .style('pointer-events', 'none')
+    .style('z-index', 1000)
+    .style('box-shadow', '0 2px 8px rgba(0,0,0,0.3)')
+    .style('max-width', '300px');
+  
+  let tooltipContent = `<div style="margin-bottom: 8px;"><strong>${node.name || node.label}</strong></div>`;
+  tooltipContent += `<div style="margin-bottom: 6px; color: #ff9800;"><strong>Answer Refinement Level</strong></div>`;
+  
+  const refinementData = questionAnsweringData.answerRefinement[level];
+  if (refinementData) {
+    tooltipContent += `<div style="margin-bottom: 4px; color: #90caf9;">Refined Answer:</div>`;
+    tooltipContent += `<div style="margin-bottom: 4px; color: #b3e5fc; font-style: italic;">${refinementData.answer}</div>`;
+    
+    if (refinementData.metaTags) {
+      tooltipContent += `<div style="margin-bottom: 4px; color: #90caf9;">Meta Tags Used:</div>`;
+      refinementData.metaTags.forEach(tag => {
+        tooltipContent += `<div style="margin: 2px 0; color: #b3e5fc;">• ${tag}</div>`;
+      });
+    }
+  }
+  
+  tooltip.html(tooltipContent)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 10) + 'px');
+}
+
 function setupQuestionAnsweringControls() {
   const controls = d3.select('#qa-controls');
   controls.html('');
@@ -3369,13 +3780,17 @@ function setupQuestionAnsweringControls() {
     .style('margin-left', '8px')
     .on('click', () => {
       questionAnsweringState.searchPath = [];
+      questionAnsweringState.animationPhase = 'search';
+      questionAnsweringState.currentRefinementLevel = null;
       createQuestionAnsweringViz();
     });
 }
 
 function animateSearchProcess() {
-  // Reset the search path
+  // Reset the state
   questionAnsweringState.searchPath = [];
+  questionAnsweringState.animationPhase = 'search';
+  questionAnsweringState.currentRefinementLevel = null;
   
   // Get the search path from the data
   const searchPath = questionAnsweringData.searchPath;
@@ -3391,9 +3806,38 @@ function animateSearchProcess() {
       createQuestionAnsweringViz();
       currentStep++;
       setTimeout(highlightNext, 1500);
+    } else {
+      // Search complete, move to graph phase
+      setTimeout(() => {
+        questionAnsweringState.animationPhase = 'graph';
+        createQuestionAnsweringViz();
+        
+        // After showing graph, move to refinement phase
+        setTimeout(() => {
+          questionAnsweringState.animationPhase = 'refinement';
+          animateAnswerRefinement();
+        }, 3000);
+      }, 1000);
     }
   };
   
   // Start the animation
   highlightNext();
+}
+
+function animateAnswerRefinement() {
+  // Start from chunk level and work up
+  const refinementLevels = ['chunkLevel', 'level1', 'level2'];
+  let currentLevelIndex = 0;
+  
+  const refineNext = () => {
+    if (currentLevelIndex < refinementLevels.length) {
+      questionAnsweringState.currentRefinementLevel = refinementLevels[currentLevelIndex];
+      createQuestionAnsweringViz();
+      currentLevelIndex++;
+      setTimeout(refineNext, 2000);
+    }
+  };
+  
+  refineNext();
 }
