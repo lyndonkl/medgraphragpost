@@ -53,6 +53,11 @@ main {
   overflow: hidden;
 }
 
+/* When both step and slide-section classes are present, prioritize slide-section behavior */
+.step.slide-section {
+  transition: opacity 0.2s ease;
+}
+
 .slide-content {
   text-align: left;
   max-width: 700px;

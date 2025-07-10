@@ -1426,7 +1426,8 @@ const slideStates = {
   'graphrag-approaches': 0,
   'graphrag-advantages': 0,
   'medgraphrag-intro': 0,
-  'graph-construction': 0
+  'graph-construction': 0,
+  'performance-results': 0
 }
 
 const slideCounts = {
@@ -1439,7 +1440,8 @@ const slideCounts = {
   'graphrag-approaches': 4,
   'graphrag-advantages': 4,
   'medgraphrag-intro': 3,
-  'graph-construction': 3
+  'graph-construction': 3,
+  'performance-results': 4
 }
 
 // Update slideCounts for graph-construction to 3
@@ -1465,14 +1467,10 @@ window.changeSlide = function(sectionName, direction) {
       return;
     }
   }
-  
-  // Note: graph-tagging is now a scrolly section, not slide-based
-  
-  // Otherwise, normal behavior
+  // Otherwise, normal behavior for all other sections (including performance-results)
   originalChangeSlideFn(sectionName, direction);
 }
 
-// Patch updateProgressDots to only show 3 dots for graph-construction
 const originalUpdateProgressDots = updateProgressDots;
 window.updateProgressDots = function(sectionName, currentSlide) {
   if (sectionName === 'graph-construction') {
@@ -1490,10 +1488,10 @@ window.updateProgressDots = function(sectionName, currentSlide) {
     });
     return;
   }
+  // Otherwise, normal behavior for all other sections (including performance-results)
   originalUpdateProgressDots(sectionName, currentSlide);
 }
 
-// Patch updateNavigationButtons to disable next on last slide for graph-construction
 const originalUpdateNavigationButtons = updateNavigationButtons;
 window.updateNavigationButtons = function(sectionName, currentSlide, totalSlides) {
   if (sectionName === 'graph-construction') {
@@ -1505,6 +1503,7 @@ window.updateNavigationButtons = function(sectionName, currentSlide, totalSlides
     if (nextBtn) nextBtn.disabled = currentSlide === totalSlides - 1;
     return;
   }
+  // Otherwise, normal behavior for all other sections (including performance-results)
   originalUpdateNavigationButtons(sectionName, currentSlide, totalSlides);
 }
 
