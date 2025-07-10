@@ -1591,6 +1591,31 @@ const entityExtractionData = {
   ]
 };
 
+// Question Answering Data
+const questionAnsweringData = {
+  question: {
+    text: "What are the treatment options for Covid-19?",
+    extractedTags: [
+      { type: 'DISEASE', value: 'Covid-19', description: 'The disease being asked about' },
+      { type: 'TREATMENT_TYPE', value: 'Options', description: 'Looking for treatment alternatives' },
+      { type: 'QUERY_TYPE', value: 'Treatment', description: 'Question is about therapeutic approaches' }
+    ]
+  },
+  searchPath: [
+    { level: 'level2', nodeId: 'meta3', reason: 'Medical Therapeutics covers treatment approaches' },
+    { level: 'level1', nodeId: 'meta1', reason: 'Infectious Disease Management includes Covid-19 treatments' },
+    { level: 'chunks', nodeId: 'chunkA', reason: 'Infectious Disease & Treatment chunk contains Covid-19 treatment info' }
+  ],
+  result: {
+    chunkId: 'chunkA',
+    relevantTags: [
+      { type: 'MEDICATION', value: 'Remdesivir', description: 'Antiviral drug for Covid-19 treatment' },
+      { type: 'TREATMENT_TYPE', value: 'Antiviral therapy', description: 'Medication targeting viral replication' }
+    ],
+    answer: "Based on the retrieved information, treatment options for Covid-19 include antiviral therapy with medications like Remdesivir, which has shown effectiveness in treating the disease."
+  }
+};
+
 // Graph Tagging Data
 const graphTaggingData = {
   chunks: {
@@ -2022,6 +2047,11 @@ scroller
     if (element.id === 'graph-tagging') {
       createGraphTaggingViz();
       setupGraphTaggingControls();
+    }
+    // Render question answering visualization if this section is entered
+    if (element.id === 'question-answering') {
+      createQuestionAnsweringViz();
+      setupQuestionAnsweringControls();
     }
     console.log(`Step ${index} entered`)
   })
@@ -3080,4 +3110,290 @@ function setupGraphTaggingControls() {
   // No controls needed for full hierarchy view
   const controls = d3.select('#tag-graph-controls');
   controls.html('');
+}
+
+// Question Answering Visualization
+let questionAnsweringState = {
+  currentStep: 0,
+  searchPath: []
+};
+
+function createQuestionAnsweringViz() {
+  const svg = d3.select('#qa-graph-svg');
+  svg.selectAll('*').remove();
+  
+  const width = 420;
+  const height = 480;
+  const margin = { top: 20, right: 20, bottom: 20, left: 20 };
+  const chartWidth = width - margin.left - margin.right;
+  const chartHeight = height - margin.top - margin.bottom;
+  
+  // Create chart group
+  const g = svg.append('g')
+    .attr('transform', `translate(${margin.left}, ${margin.top})`);
+  
+  // Add title
+  g.append('text')
+    .attr('x', chartWidth / 2)
+    .attr('y', 0)
+    .attr('text-anchor', 'middle')
+    .style('font-size', '16px')
+    .style('font-weight', '600')
+    .style('fill', '#333')
+    .text('Tag Tree Search Process');
+  
+  // Render the search process
+  renderSearchProcess(g, chartWidth, chartHeight);
+}
+
+function renderSearchProcess(g, width, height) {
+  const nodeRadius = 20;
+  const levelSpacing = 80;
+  const nodeSpacing = 120;
+  
+  // Level 2 (Top) - Medical Therapeutics
+  const level2Meta = graphTaggingData.metaTags.level2[0];
+  const level2X = width / 2;
+  const level2Y = 60;
+  
+  // Draw level 2 node with search highlighting
+  const isLevel2Matched = questionAnsweringState.searchPath.some(p => p.level === 'level2' && p.nodeId === level2Meta.id);
+  g.append('circle')
+    .attr('cx', level2X)
+    .attr('cy', level2Y)
+    .attr('r', nodeRadius)
+    .attr('fill', isLevel2Matched ? '#ffc107' : level2Meta.color)
+    .attr('fill-opacity', 0.8)
+    .attr('stroke', isLevel2Matched ? '#ff6f00' : '#333')
+    .attr('stroke-width', isLevel2Matched ? 3 : 2)
+    .attr('cursor', 'pointer')
+    .on('mouseover', (event) => showSearchTooltip(event, level2Meta, isLevel2Matched))
+    .on('mouseout', hideTooltip);
+  
+  // Add level 2 label
+  g.append('text')
+    .attr('x', level2X)
+    .attr('y', level2Y + 5)
+    .attr('text-anchor', 'middle')
+    .style('font-size', '12px')
+    .style('font-weight', '600')
+    .style('fill', '#fff')
+    .text('MT')
+    .attr('pointer-events', 'none');
+  
+  // Level 1 (Middle) - Meta tags
+  const level1Metas = graphTaggingData.metaTags.level1;
+  level1Metas.forEach((meta, i) => {
+    const level1X = width / 2 + (i === 0 ? -nodeSpacing/2 : nodeSpacing/2);
+    const level1Y = level2Y + levelSpacing;
+    
+    const isLevel1Matched = questionAnsweringState.searchPath.some(p => p.level === 'level1' && p.nodeId === meta.id);
+    
+    // Draw level 1 node
+    g.append('circle')
+      .attr('cx', level1X)
+      .attr('cy', level1Y)
+      .attr('r', nodeRadius)
+      .attr('fill', isLevel1Matched ? '#ffc107' : meta.color)
+      .attr('fill-opacity', 0.8)
+      .attr('stroke', isLevel1Matched ? '#ff6f00' : '#333')
+      .attr('stroke-width', isLevel1Matched ? 3 : 2)
+      .attr('cursor', 'pointer')
+      .on('mouseover', (event) => showSearchTooltip(event, meta, isLevel1Matched))
+      .on('mouseout', hideTooltip);
+    
+    // Add level 1 label
+    g.append('text')
+      .attr('x', level1X)
+      .attr('y', level1Y + 5)
+      .attr('text-anchor', 'middle')
+      .style('font-size', '12px')
+      .style('font-weight', '600')
+      .style('fill', '#fff')
+      .text(getAcronym(meta))
+      .attr('pointer-events', 'none');
+    
+    // Draw connection line from level 2 to level 1
+    const lineColor = (isLevel2Matched && isLevel1Matched) ? '#ff6f00' : '#666';
+    const lineWidth = (isLevel2Matched && isLevel1Matched) ? 3 : 2;
+    g.append('line')
+      .attr('x1', level2X)
+      .attr('y1', level2Y + nodeRadius)
+      .attr('x2', level1X)
+      .attr('y2', level1Y - nodeRadius)
+      .attr('stroke', lineColor)
+      .attr('stroke-width', lineWidth)
+      .attr('stroke-dasharray', '3 2');
+  });
+  
+  // Level 0 (Bottom) - Chunks
+  const chunks = Object.values(graphTaggingData.chunks);
+  chunks.forEach((chunk, i) => {
+    const chunkX = width / 2 + (i === 0 ? -nodeSpacing/2 : nodeSpacing/2);
+    const chunkY = level2Y + 2 * levelSpacing;
+    
+    const isChunkMatched = questionAnsweringState.searchPath.some(p => p.level === 'chunks' && p.nodeId === chunk.id);
+    
+    // Draw chunk node
+    g.append('circle')
+      .attr('cx', chunkX)
+      .attr('cy', chunkY)
+      .attr('r', nodeRadius)
+      .attr('fill', isChunkMatched ? '#ffc107' : chunk.color)
+      .attr('fill-opacity', 0.8)
+      .attr('stroke', isChunkMatched ? '#ff6f00' : '#333')
+      .attr('stroke-width', isChunkMatched ? 3 : 2)
+      .attr('cursor', 'pointer')
+      .on('mouseover', (event) => showSearchTooltip(event, chunk, isChunkMatched))
+      .on('mouseout', hideTooltip);
+    
+    // Add chunk label
+    g.append('text')
+      .attr('x', chunkX)
+      .attr('y', chunkY + 5)
+      .attr('text-anchor', 'middle')
+      .style('font-size', '12px')
+      .style('font-weight', '600')
+      .style('fill', '#fff')
+      .text(getAcronym(chunk))
+      .attr('pointer-events', 'none');
+    
+    // Draw connection line from level 1 to chunk
+    const parentMeta = level1Metas[i];
+    const parentX = width / 2 + (i === 0 ? -nodeSpacing/2 : nodeSpacing/2);
+    const parentY = level2Y + levelSpacing;
+    const isParentMatched = questionAnsweringState.searchPath.some(p => p.level === 'level1' && p.nodeId === parentMeta.id);
+    
+    const lineColor = (isParentMatched && isChunkMatched) ? '#ff6f00' : '#666';
+    const lineWidth = (isParentMatched && isChunkMatched) ? 3 : 2;
+    g.append('line')
+      .attr('x1', parentX)
+      .attr('y1', parentY + nodeRadius)
+      .attr('x2', chunkX)
+      .attr('y2', chunkY - nodeRadius)
+      .attr('stroke', lineColor)
+      .attr('stroke-width', lineWidth)
+      .attr('stroke-dasharray', '3 2');
+  });
+  
+  // Add search result info
+  if (questionAnsweringState.searchPath.length > 0) {
+    g.append('text')
+      .attr('x', width / 2)
+      .attr('y', height - 30)
+      .attr('text-anchor', 'middle')
+      .style('font-size', '12px')
+      .style('font-weight', '600')
+      .style('fill', '#28a745')
+      .text('✓ Found relevant chunk: Infectious Disease & Treatment');
+    
+    g.append('text')
+      .attr('x', width / 2)
+      .attr('y', height - 15)
+      .attr('text-anchor', 'middle')
+      .style('font-size', '11px')
+      .style('fill', '#666')
+      .text('Contains: Remdesivir, Antiviral therapy');
+  }
+}
+
+function showSearchTooltip(event, node, isMatched) {
+  hideTooltip();
+  const tooltip = d3.select('body').append('div')
+    .attr('class', 'tooltip')
+    .style('position', 'absolute')
+    .style('background', 'rgba(0,0,0,0.92)')
+    .style('color', 'white')
+    .style('padding', '12px 16px')
+    .style('border-radius', '6px')
+    .style('font-size', '13px')
+    .style('pointer-events', 'none')
+    .style('z-index', 1000)
+    .style('box-shadow', '0 2px 8px rgba(0,0,0,0.3)')
+    .style('max-width', '300px');
+  
+  let tooltipContent = `<div style="margin-bottom: 8px;"><strong>${node.name || node.label}</strong></div>`;
+  
+  if (isMatched) {
+    const searchStep = questionAnsweringState.searchPath.find(p => 
+      (p.level === 'chunks' && p.nodeId === node.id) ||
+      (p.level === 'level1' && p.nodeId === node.id) ||
+      (p.level === 'level2' && p.nodeId === node.id)
+    );
+    
+    tooltipContent += `<div style="margin-bottom: 6px; color: #ffc107;"><strong>✓ Search Match</strong></div>`;
+    tooltipContent += `<div style="margin-bottom: 4px; color: #90caf9;">Reason: ${searchStep.reason}</div>`;
+  }
+  
+  if (node.tags) {
+    tooltipContent += `<div style="margin-bottom: 4px; color: #90caf9;">Tags (${node.tags.length})</div>`;
+    node.tags.forEach(tag => {
+      tooltipContent += `<div style="margin: 2px 0; padding: 2px 0; border-bottom: 1px solid #444;">`;
+      tooltipContent += `<span style="color: #90caf9;">${tag.type}:</span> ${tag.value}`;
+      tooltipContent += `<div style="font-size: 11px; color: #b3e5fc; font-style: italic; margin-top: 2px;">${tag.description}</div>`;
+      tooltipContent += `</div>`;
+    });
+  }
+  
+  tooltip.html(tooltipContent)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 10) + 'px');
+}
+
+function setupQuestionAnsweringControls() {
+  const controls = d3.select('#qa-controls');
+  controls.html('');
+  
+  const searchBtn = controls.append('button')
+    .text('Start Search')
+    .style('padding', '8px 16px')
+    .style('background', '#007bff')
+    .style('color', 'white')
+    .style('border', 'none')
+    .style('border-radius', '4px')
+    .style('font-size', '14px')
+    .style('cursor', 'pointer')
+    .on('click', () => {
+      animateSearchProcess();
+    });
+  
+  const resetBtn = controls.append('button')
+    .text('Reset')
+    .style('padding', '8px 16px')
+    .style('background', '#6c757d')
+    .style('color', 'white')
+    .style('border', 'none')
+    .style('border-radius', '4px')
+    .style('font-size', '14px')
+    .style('cursor', 'pointer')
+    .style('margin-left', '8px')
+    .on('click', () => {
+      questionAnsweringState.searchPath = [];
+      createQuestionAnsweringViz();
+    });
+}
+
+function animateSearchProcess() {
+  // Reset the search path
+  questionAnsweringState.searchPath = [];
+  
+  // Get the search path from the data
+  const searchPath = questionAnsweringData.searchPath;
+  let currentStep = 0;
+  
+  const highlightNext = () => {
+    if (currentStep < searchPath.length) {
+      const step = searchPath[currentStep];
+      // Add the current step to the search path
+      questionAnsweringState.searchPath.push(step);
+      
+      // Update the visualization to highlight the current step
+      createQuestionAnsweringViz();
+      currentStep++;
+      setTimeout(highlightNext, 1500);
+    }
+  };
+  
+  // Start the animation
+  highlightNext();
 }

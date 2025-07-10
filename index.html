@@ -48,6 +48,74 @@
             margin-bottom: 32px;
             margin-top: 0;
         }
+        
+        /* Question Answering Styles */
+        .question-panel {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .question-card {
+            background: white;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .question-card p {
+            margin: 0;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        
+        .extracted-tags h4 {
+            margin: 0 0 12px 0;
+            color: #495057;
+            font-size: 14px;
+        }
+        
+        .tag-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .tag {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            color: white;
+        }
+        
+        .tag.disease {
+            background: #dc3545;
+        }
+        
+        .tag.treatment {
+            background: #28a745;
+        }
+        
+        .tag.query {
+            background: #17a2b8;
+        }
+        
+        .tag.matched {
+            background: #ffc107;
+            color: #212529;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
     </style>
 </head>
 <body>
@@ -1397,6 +1465,35 @@
                         <svg id="tag-graph-svg" width="420" height="480"></svg>
                     </div>
                     <div id="tag-graph-controls" style="margin-top: 16px; display: flex; gap: 12px;"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Question Answering Section -->
+        <section id="question-answering" class="step">
+            <h2 class="section-header">Question Answering with Tag Tree</h2>
+            <div class="content" style="display: flex; gap: 40px; align-items: stretch;">
+                <div style="flex: 1; min-width: 320px;">
+                    <div class="question-panel">
+                        <h3>Medical Question</h3>
+                        <div class="question-card">
+                            <p><strong>Q:</strong> "What are the treatment options for Covid-19?"</p>
+                        </div>
+                        <div class="extracted-tags">
+                            <h4>Extracted Tags:</h4>
+                            <div class="tag-list">
+                                <span class="tag disease">DISEASE: Covid-19</span>
+                                <span class="tag treatment">TREATMENT_TYPE: Options</span>
+                                <span class="tag query">QUERY_TYPE: Treatment</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div style="flex: 1; min-width: 400px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;">
+                    <div id="question-answering-viz" style="width: 100%; height: 500px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fafafa; display: flex; align-items: center; justify-content: center;">
+                        <svg id="qa-graph-svg" width="420" height="480"></svg>
+                    </div>
+                    <div id="qa-controls" style="margin-top: 16px; display: flex; gap: 12px;"></div>
                 </div>
             </div>
         </section>
