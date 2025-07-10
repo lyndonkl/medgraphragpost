@@ -1427,7 +1427,8 @@ const slideStates = {
   'graphrag-advantages': 0,
   'medgraphrag-intro': 0,
   'graph-construction': 0,
-  'performance-results': 0
+  'performance-results': 0,
+  'conclusion': 0
 }
 
 const slideCounts = {
@@ -1441,7 +1442,8 @@ const slideCounts = {
   'graphrag-advantages': 4,
   'medgraphrag-intro': 3,
   'graph-construction': 3,
-  'performance-results': 4
+  'performance-results': 4,
+  'conclusion': 4
 }
 
 // Update slideCounts for graph-construction to 3

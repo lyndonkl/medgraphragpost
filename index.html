@@ -1625,11 +1625,123 @@
             </div>
         </section>
 
-        <!-- Conclusion -->
-        <section id="conclusion" class="step">
+        <!-- Conclusion - Slide 1 -->
+        <section id="conclusion-1" class="step slide-section">
             <div class="content">
                 <h2>Conclusion</h2>
-                <p>How MedGraphRAG revolutionizes medical question answering</p>
+                <div class="slide-content">
+                    <h3>Traditional RAG's Limitations</h3>
+                    <p>Standard retrieval-augmented generation faces significant challenges in complex domains:</p>
+                    <ul>
+                        <li><strong>Complex Query Understanding:</strong> Struggles with multi-step reasoning and conditional relationships</li>
+                        <li><strong>Distributed Knowledge:</strong> Cannot connect information scattered across multiple documents</li>
+                        <li><strong>LLM Constraints:</strong> Limited context windows waste space on irrelevant content</li>
+                        <li><strong>Scalability Issues:</strong> Linear search time growth with knowledge base size</li>
+                    </ul>
+                    <p>These limitations make traditional RAG inadequate for specialized, knowledge-intensive domains like medicine.</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('conclusion', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot active" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('conclusion', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Conclusion - Slide 2 -->
+        <section id="conclusion-2" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Conclusion</h2>
+                <div class="slide-content">
+                    <h3>GraphRAG as a Solution</h3>
+                    <p>Knowledge graphs provide the missing link for advanced retrieval and reasoning:</p>
+                    <ul>
+                        <li><strong>Richer Context:</strong> Structured relationships enable deeper understanding of concepts</li>
+                        <li><strong>Better Reasoning:</strong> Graph traversal supports multi-hop inference and causal relationships</li>
+                        <li><strong>Focused Retrieval:</strong> Targeted search through relevant subgraphs reduces noise</li>
+                    </ul>
+                    <h4>Flexible Approaches</h4>
+                    <ul>
+                        <li><strong>Knowledge-based:</strong> Leverages existing medical ontologies and relationships</li>
+                        <li><strong>Index-based:</strong> Builds graph indices over traditional document collections</li>
+                        <li><strong>Hybrid:</strong> Combines both approaches for optimal performance</li>
+                    </ul>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('conclusion', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot active" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('conclusion', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Conclusion - Slide 3 -->
+        <section id="conclusion-3" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Conclusion</h2>
+                <div class="slide-content">
+                    <h3>MedGraphRAG: A Case Study in Excellence</h3>
+                    <p>MedGraphRAG demonstrates how tailored GraphRAG can revolutionize specialized domains:</p>
+                    <ul>
+                        <li><strong>State-of-the-Art Performance:</strong> Surpasses existing benchmarks across 11 medical datasets</li>
+                        <li><strong>Safer Medical Insights:</strong> Evidence-based responses with proper citations and reasoning</li>
+                        <li><strong>Enhanced Understandability:</strong> Clear explanations for both clinicians and patients</li>
+                    </ul>
+                    <h4>Key Innovations</h4>
+                    <ul>
+                        <li><strong>Triple Graph Construction:</strong> EHR, research papers, and medical dictionaries create comprehensive knowledge</li>
+                        <li><strong>U-Retrieval:</strong> Hierarchical tag-based retrieval ensures relevant, focused results</li>
+                        <li><strong>Multi-tier Architecture:</strong> Leverages domain-specific medical knowledge effectively</li>
+                    </ul>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('conclusion', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot active" data-slide="2"></span>
+                        <span class="dot" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('conclusion', 1)">→</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Conclusion - Slide 4 -->
+        <section id="conclusion-4" class="step slide-section" style="display: none;">
+            <div class="content">
+                <h2>Conclusion</h2>
+                <div class="slide-content">
+                    <h3>The Path Forward</h3>
+                    <p>Graph-based RAG represents a fundamental shift in how we approach AI-powered knowledge systems:</p>
+                    <ul>
+                        <li><strong>Deeper Understanding:</strong> Structured knowledge enables more sophisticated reasoning</li>
+                        <li><strong>Enhanced Reliability:</strong> Evidence-based responses with traceable sources</li>
+                        <li><strong>Domain Specialization:</strong> Tailored approaches for complex, knowledge-intensive tasks</li>
+                    </ul>
+                    <p><strong>For medicine and beyond, GraphRAG is crucial for unlocking the full potential of large language models in specialized domains.</strong></p>
+                    <p>The combination of structured knowledge, intelligent retrieval, and domain expertise creates systems that are not just more accurate, but more trustworthy and useful.</p>
+                </div>
+                <div class="slide-navigation">
+                    <button class="nav-btn prev-btn" onclick="changeSlide('conclusion', -1)">←</button>
+                    <div class="progress-dots">
+                        <span class="dot" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                        <span class="dot active" data-slide="3"></span>
+                    </div>
+                    <button class="nav-btn next-btn" onclick="changeSlide('conclusion', 1)">→</button>
+                </div>
             </div>
         </section>
     </main>
