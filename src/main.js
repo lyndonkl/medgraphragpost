@@ -1439,7 +1439,68 @@ const slideCounts = {
   'graphrag-approaches': 4,
   'graphrag-advantages': 4,
   'medgraphrag-intro': 3,
-  'graph-construction': 4
+  'graph-construction': 3
+}
+
+// Update slideCounts for graph-construction to 3
+slideCounts['graph-construction'] = 3;
+
+// Patch changeSlide to transition to overall-graph-structure after last graph-construction slide
+const originalChangeSlideFn = changeSlide;
+window.changeSlide = function(sectionName, direction) {
+  // If we're on the last graph-construction slide and click next, go to overall-graph-structure
+  if (sectionName === 'graph-construction') {
+    const currentSlide = slideStates[sectionName];
+    const totalSlides = slideCounts[sectionName];
+    if (currentSlide === totalSlides - 1 && direction === 1) {
+      // Hide all graph-construction slides
+      for (let i = 0; i < totalSlides; i++) {
+        const slideElement = document.getElementById(`${sectionName}-${i + 1}`);
+        if (slideElement) slideElement.style.display = 'none';
+      }
+      // Show the overall graph structure section
+      showSection('overall-graph-structure');
+      return;
+    }
+  }
+  // Otherwise, normal behavior
+  originalChangeSlideFn(sectionName, direction);
+}
+
+// Patch updateProgressDots to only show 3 dots for graph-construction
+const originalUpdateProgressDots = updateProgressDots;
+window.updateProgressDots = function(sectionName, currentSlide) {
+  if (sectionName === 'graph-construction') {
+    // Only show 3 dots
+    const slideElement = document.getElementById(`${sectionName}-${currentSlide + 1}`);
+    if (!slideElement) return;
+    const dots = slideElement.querySelectorAll('.dot');
+    dots.forEach((dot, index) => {
+      if (index < 3) {
+        dot.style.display = '';
+        dot.classList.toggle('active', index === currentSlide);
+      } else {
+        dot.style.display = 'none';
+      }
+    });
+    return;
+  }
+  originalUpdateProgressDots(sectionName, currentSlide);
+}
+
+// Patch updateNavigationButtons to disable next on last slide for graph-construction
+const originalUpdateNavigationButtons = updateNavigationButtons;
+window.updateNavigationButtons = function(sectionName, currentSlide, totalSlides) {
+  if (sectionName === 'graph-construction') {
+    const slideElement = document.getElementById(`${sectionName}-${currentSlide + 1}`);
+    if (!slideElement) return;
+    const prevBtn = slideElement.querySelector('.prev-btn');
+    const nextBtn = slideElement.querySelector('.next-btn');
+    if (prevBtn) prevBtn.disabled = currentSlide === 0;
+    if (nextBtn) nextBtn.disabled = currentSlide === totalSlides - 1;
+    return;
+  }
+  originalUpdateNavigationButtons(sectionName, currentSlide, totalSlides);
 }
 
 function changeSlide(sectionName, direction) {
@@ -1854,11 +1915,13 @@ scroller
   })
   .onStepEnter(response => {
     const { element, index, direction } = response
-    
     // Add active class to current step
     d3.selectAll('.step').classed('active', false)
     d3.select(element).classed('active', true)
-    
+    // Render overall graph structure if this section is entered
+    if (element.id === 'overall-graph-structure') {
+      renderOverallGraphStructure();
+    }
     console.log(`Step ${index} entered`)
   })
   .onStepExit(response => {
@@ -1874,3 +1937,277 @@ document.addEventListener('DOMContentLoaded', () => {
   // Handle window resize
   window.addEventListener('resize', scroller.resize)
 }) 
+
+// === Overall Graph Structure Visualization ===
+
+const overallGraphData = {
+  layers: [
+    {
+      id: 'ehr',
+      label: 'EHR Data',
+      color: '#ff7043',
+      y: 120,
+      nodes: [
+        { id: 'ehr1', name: 'Patient A', type: 'EHR', meta: { timestamp: '2024-06-01', event: 'Admission' } },
+        { id: 'ehr2', name: 'Patient B', type: 'EHR', meta: { timestamp: '2024-06-02', event: 'Lab Result' } }
+      ]
+    },
+    {
+      id: 'papers',
+      label: 'Med Books & Papers',
+      color: '#42a5f5',
+      y: 300,
+      nodes: [
+        { id: 'paper1', name: 'COVID-19 Treatment', type: 'Paper', meta: { authors: 'Smith et al.', year: 2021 } },
+        { id: 'paper2', name: 'Steroids in ARDS', type: 'Book', meta: { authors: 'Lee et al.', year: 2020 } }
+      ]
+    },
+    {
+      id: 'dict',
+      label: 'Med Vocabularies',
+      color: '#66bb6a',
+      y: 480,
+      nodes: [
+        { id: 'dict1', name: 'Glucocorticoids', type: 'Definition', meta: { definition: 'A group of corticosteroids...' } },
+        { id: 'dict2', name: 'Remdesivir', type: 'Definition', meta: { definition: 'An antiviral medication...' } }
+      ]
+    }
+  ],
+  edges: [
+    // EHR to Papers
+    { source: 'ehr1', target: 'paper1' },
+    { source: 'ehr2', target: 'paper2' },
+    // Papers to Dictionary
+    { source: 'paper1', target: 'dict2' },
+    { source: 'paper2', target: 'dict1' }
+  ]
+};
+
+let overallGraphState = {
+  view: 'overview', // or layer id
+  zoomedLayer: null
+};
+
+function renderOverallGraphStructure() {
+  const svg = d3.select('#overall-graph-svg');
+  svg.selectAll('*').remove();
+
+  // Draw planes
+  overallGraphData.layers.forEach(layer => {
+    // Plane
+    svg.append('rect')
+      .attr('x', 60)
+      .attr('y', layer.y - 30)
+      .attr('width', 680)
+      .attr('height', 80)
+      .attr('rx', 28)
+      .attr('fill', layer.color)
+      .attr('fill-opacity', 0.13)
+      .attr('stroke', layer.color)
+      .attr('stroke-width', 2)
+      .attr('cursor', 'pointer')
+      .on('click', () => zoomToLayer(layer.id));
+
+    // Label
+    svg.append('text')
+      .attr('x', 400)
+      .attr('y', layer.y - 40)
+      .attr('text-anchor', 'middle')
+      .attr('font-size', 22)
+      .attr('font-weight', 700)
+      .attr('fill', layer.color)
+      .text(layer.label)
+      .attr('pointer-events', 'none');
+  });
+
+  // Draw nodes on planes
+  overallGraphData.layers.forEach(layer => {
+    const nodeSpacing = 220;
+    layer.nodes.forEach((node, i) => {
+      const x = 200 + i * nodeSpacing;
+      svg.append('ellipse')
+        .attr('cx', x)
+        .attr('cy', layer.y)
+        .attr('rx', 44)
+        .attr('ry', 28)
+        .attr('fill', layer.color)
+        .attr('fill-opacity', 0.85)
+        .attr('stroke', '#333')
+        .attr('stroke-width', 2)
+        .attr('cursor', 'pointer')
+        .on('mouseover', (event) => showOverallNodeTooltip(event, node, layer))
+        .on('mouseout', hideTooltip);
+      svg.append('text')
+        .attr('x', x)
+        .attr('y', layer.y + 6)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', 16)
+        .attr('font-weight', 600)
+        .attr('fill', '#fff')
+        .text(node.name)
+        .attr('pointer-events', 'none');
+    });
+  });
+
+  // Draw edges between layers
+  overallGraphData.edges.forEach(edge => {
+    const src = findNodeById(edge.source);
+    const tgt = findNodeById(edge.target);
+    if (src && tgt) {
+      svg.insert('line', ':first-child')
+        .attr('x1', getNodeX(src))
+        .attr('y1', getNodeY(src))
+        .attr('x2', getNodeX(tgt))
+        .attr('y2', getNodeY(tgt))
+        .attr('stroke', '#888')
+        .attr('stroke-width', 2)
+        .attr('stroke-dasharray', '6 4');
+    }
+  });
+
+  // Hide back button
+  document.getElementById('overall-graph-back').style.display = 'none';
+  overallGraphState.view = 'overview';
+  overallGraphState.zoomedLayer = null;
+}
+
+function zoomToLayer(layerId) {
+  overallGraphState.view = layerId;
+  overallGraphState.zoomedLayer = layerId;
+  renderLayerSubgraph(layerId);
+  document.getElementById('overall-graph-back').style.display = 'block';
+}
+
+function renderLayerSubgraph(layerId) {
+  const svg = d3.select('#overall-graph-svg');
+  svg.selectAll('*').remove();
+  const layer = overallGraphData.layers.find(l => l.id === layerId);
+  if (!layer) return;
+
+  // Draw plane
+  svg.append('rect')
+    .attr('x', 60)
+    .attr('y', 180)
+    .attr('width', 680)
+    .attr('height', 240)
+    .attr('rx', 38)
+    .attr('fill', layer.color)
+    .attr('fill-opacity', 0.18)
+    .attr('stroke', layer.color)
+    .attr('stroke-width', 2);
+
+  // Label
+  svg.append('text')
+    .attr('x', 400)
+    .attr('y', 170)
+    .attr('text-anchor', 'middle')
+    .attr('font-size', 28)
+    .attr('font-weight', 700)
+    .attr('fill', layer.color)
+    .text(layer.label);
+
+  // Draw nodes (spread horizontally)
+  const nodeSpacing = 320 / (layer.nodes.length + 1);
+  layer.nodes.forEach((node, i) => {
+    const x = 220 + (i + 1) * nodeSpacing * 2;
+    svg.append('ellipse')
+      .attr('cx', x)
+      .attr('cy', 300)
+      .attr('rx', 60)
+      .attr('ry', 38)
+      .attr('fill', layer.color)
+      .attr('fill-opacity', 0.92)
+      .attr('stroke', '#333')
+      .attr('stroke-width', 2)
+      .on('mouseover', (event) => showOverallNodeTooltip(event, node, layer))
+      .on('mouseout', hideTooltip);
+    svg.append('text')
+      .attr('x', x)
+      .attr('y', 308)
+      .attr('text-anchor', 'middle')
+      .attr('font-size', 20)
+      .attr('font-weight', 700)
+      .attr('fill', '#fff')
+      .text(node.name)
+      .attr('pointer-events', 'none');
+  });
+}
+
+function resetOverallGraphView() {
+  renderOverallGraphStructure();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const backBtn = document.getElementById('overall-graph-back');
+  if (backBtn) {
+    backBtn.onclick = resetOverallGraphView;
+  }
+});
+
+function findNodeById(id) {
+  for (const layer of overallGraphData.layers) {
+    for (const node of layer.nodes) {
+      if (node.id === id) return node;
+    }
+  }
+  return null;
+}
+function getNodeX(node) {
+  // Use same logic as in renderOverallGraphStructure
+  const layer = overallGraphData.layers.find(l => l.nodes.some(n => n.id === node.id));
+  const i = layer.nodes.findIndex(n => n.id === node.id);
+  return 200 + i * 220;
+}
+function getNodeY(node) {
+  const layer = overallGraphData.layers.find(l => l.nodes.some(n => n.id === node.id));
+  return layer.y;
+}
+
+function showOverallNodeTooltip(event, node, layer) {
+  hideTooltip();
+  let metaHtml = '';
+  if (layer.id === 'ehr') {
+    metaHtml = `<div><strong>Timestamp:</strong> ${node.meta.timestamp}</div><div><strong>Event:</strong> ${node.meta.event}</div>`;
+  } else if (layer.id === 'papers') {
+    metaHtml = `<div><strong>Authors:</strong> ${node.meta.authors}</div><div><strong>Year:</strong> ${node.meta.year}</div>`;
+  } else if (layer.id === 'dict') {
+    metaHtml = `<div><strong>Definition:</strong> <span style='font-style:italic;'>${node.meta.definition}</span></div>`;
+  }
+  const tooltip = d3.select('body').append('div')
+    .attr('class', 'tooltip')
+    .style('position', 'absolute')
+    .style('background', 'rgba(0,0,0,0.92)')
+    .style('color', 'white')
+    .style('padding', '10px 16px')
+    .style('border-radius', '6px')
+    .style('font-size', '14px')
+    .style('pointer-events', 'none')
+    .style('z-index', 1000)
+    .style('box-shadow', '0 2px 8px rgba(0,0,0,0.3)');
+  tooltip.html(`
+    <div><strong>Name:</strong> ${node.name}</div>
+    <div><strong>Type:</strong> ${node.type}</div>
+    ${metaHtml}
+  `)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 10) + 'px');
+}
+
+// === Section Navigation Integration for Overall Graph Structure ===
+
+function showSection(sectionId) {
+  // Hide all step sections
+  document.querySelectorAll('.step').forEach(sec => sec.style.display = 'none');
+  // Show the requested section
+  const section = document.getElementById(sectionId);
+  if (section) {
+    section.style.display = '';
+    // If it's the overall graph structure, render the graph
+    if (sectionId === 'overall-graph-structure') {
+      renderOverallGraphStructure();
+    }
+  }
+}
+
+// Example: Hook up to navigation (replace with your actual navigation logic)
+// showSection('overall-graph-structure'); // Uncomment to test directly
