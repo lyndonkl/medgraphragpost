@@ -1445,6 +1445,8 @@ const slideCounts = {
 // Update slideCounts for graph-construction to 3
 slideCounts['graph-construction'] = 3;
 
+// Add slideCounts for graph-tagging (removed - not needed for single section)
+
 // Patch changeSlide to transition to overall-graph-structure after last graph-construction slide
 const originalChangeSlideFn = changeSlide;
 window.changeSlide = function(sectionName, direction) {
@@ -1463,6 +1465,9 @@ window.changeSlide = function(sectionName, direction) {
       return;
     }
   }
+  
+  // Note: graph-tagging is now a scrolly section, not slide-based
+  
   // Otherwise, normal behavior
   originalChangeSlideFn(sectionName, direction);
 }
@@ -1584,6 +1589,75 @@ const entityExtractionData = {
     { source: 'covid19', target: 'respiratory', label: 'is a' },
     { source: 'dexamethasone', target: 'glucocorticoids', label: 'is a' }
   ]
+};
+
+// Graph Tagging Data
+const graphTaggingData = {
+  chunks: {
+    chunkA: {
+      id: 'chunkA',
+      name: 'Infectious Disease & Treatment',
+      color: '#ff6b6b',
+      tags: [
+        { type: 'DISEASE', value: 'Covid-19', description: 'Respiratory disease causing severe illness' },
+        { type: 'MEDICATION', value: 'Remdesivir', description: 'Antiviral drug for Covid-19 treatment' },
+        { type: 'SYMPTOM', value: 'Respiratory distress', description: 'Difficulty breathing and lung complications' },
+        { type: 'TREATMENT_TYPE', value: 'Antiviral therapy', description: 'Medication targeting viral replication' },
+        { type: 'BODY_SYSTEM', value: 'Respiratory system', description: 'Lungs and breathing apparatus' }
+      ]
+    },
+    chunkB: {
+      id: 'chunkB', 
+      name: 'Hormones & Pharmacology',
+      color: '#4ecdc4',
+      tags: [
+        { type: 'MEDICATION_CLASS', value: 'Glucocorticoids', description: 'Hormones that reduce inflammation' },
+        { type: 'MEDICATION', value: 'Dexamethasone', description: 'Specific glucocorticoid medication' },
+        { type: 'BODY_FUNCTION', value: 'Inflammation regulation', description: 'Control of inflammatory responses' },
+        { type: 'PHARMACOLOGY', value: 'Anti-inflammatory', description: 'Medication mechanism of action' },
+        { type: 'HORMONE_TYPE', value: 'Steroid hormones', description: 'Class of hormone medications' }
+      ]
+    }
+  },
+  metaTags: {
+    level1: [
+      {
+        id: 'meta1',
+        name: 'Infectious Disease Management',
+        color: '#ff6b6b',
+        children: ['chunkA'],
+        tags: [
+          { type: 'DISEASE_CATEGORY', value: 'Infectious diseases', description: 'Diseases caused by pathogens' },
+          { type: 'TREATMENT_APPROACH', value: 'Antiviral therapy', description: 'Targeted treatment for viral infections' },
+          { type: 'CLINICAL_FOCUS', value: 'Respiratory medicine', description: 'Specialized care for breathing disorders' }
+        ]
+      },
+      {
+        id: 'meta2',
+        name: 'Endocrinology & Pharmacology',
+        color: '#4ecdc4',
+        children: ['chunkB'],
+        tags: [
+          { type: 'MEDICAL_SPECIALTY', value: 'Endocrinology', description: 'Study of hormones and metabolism' },
+          { type: 'DRUG_CLASS', value: 'Steroid medications', description: 'Hormone-based pharmaceutical agents' },
+          { type: 'THERAPEUTIC_GOAL', value: 'Inflammation control', description: 'Managing inflammatory responses' }
+        ]
+      }
+    ],
+    level2: [
+      {
+        id: 'meta3',
+        name: 'Medical Therapeutics',
+        color: '#45b7d1',
+        children: ['meta1', 'meta2'],
+        tags: [
+          { type: 'MEDICAL_DOMAIN', value: 'Clinical therapeutics', description: 'Application of medical treatments' },
+          { type: 'PATIENT_CARE', value: 'Disease management', description: 'Comprehensive treatment approaches' },
+          { type: 'HEALTHCARE_FOCUS', value: 'Treatment optimization', description: 'Improving patient outcomes' }
+        ]
+      }
+    ]
+  }
 };
 
 const entityNodeTypeColors = {
@@ -1903,6 +1977,29 @@ const initVisualizations = () => {
   createVectorPlot()
   createRAGViz()
   createKnowledgeGraph()
+  
+  // Setup entity extraction controls when the slide becomes visible
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+        const target = mutation.target;
+        if (target.id === 'graph-construction-3' && target.style.display !== 'none') {
+          console.log('Graph construction slide 3 is now visible, setting up controls');
+          setupEntityGraphControls();
+          animateEntityExtraction();
+        }
+        // Note: graph-tagging is now handled by Scrollama onStepEnter
+      }
+    });
+  });
+  
+  // Start observing the graph construction slide
+  const graphConstructionSlide = document.getElementById('graph-construction-3');
+  if (graphConstructionSlide) {
+    observer.observe(graphConstructionSlide, { attributes: true });
+  }
+  
+  // Note: graph-tagging is now handled by Scrollama onStepEnter
 }
 
 // Scrollama setup
@@ -1920,6 +2017,11 @@ scroller
     // Render overall graph structure if this section is entered
     if (element.id === 'overall-graph-structure') {
       renderOverallGraphStructure();
+    }
+    // Render graph tagging visualization if this section is entered
+    if (element.id === 'graph-tagging') {
+      createGraphTaggingViz();
+      setupGraphTaggingControls();
     }
     console.log(`Step ${index} entered`)
   })
@@ -2372,6 +2474,12 @@ function zoomToLayer(layerId) {
   overallGraphState.zoomedLayer = layerId;
   renderLayerSubgraph(layerId);
   document.getElementById('overall-graph-back').style.display = 'block';
+  
+  // Add click event handler for back button
+  document.getElementById('overall-graph-back').onclick = function() {
+    renderOverallGraphStructure();
+    document.getElementById('overall-graph-back').style.display = 'none';
+  };
 }
 
 function renderLayerSubgraph(layerId) {
@@ -2581,6 +2689,7 @@ function showSection(sectionId) {
     if (sectionId === 'overall-graph-structure') {
       renderOverallGraphStructure();
     }
+    // Note: graph-tagging is now handled by Scrollama onStepEnter
   }
 }
 
@@ -2596,4 +2705,379 @@ function getAcronym(node) {
     return label.slice(0, 4).toUpperCase();
   }
   return words.map(w => w[0]).join('').toUpperCase().slice(0, 4);
+}
+
+// Graph Tagging Visualization
+let graphTaggingState = {
+  currentLevel: 'chunks', // 'chunks', 'level1', 'level2'
+  currentSlide: 0
+};
+
+function createGraphTaggingViz() {
+  const svg = d3.select('#tag-graph-svg');
+  svg.selectAll('*').remove();
+  
+  const width = 420;
+  const height = 480;
+  const margin = { top: 20, right: 20, bottom: 20, left: 20 };
+  const chartWidth = width - margin.left - margin.right;
+  const chartHeight = height - margin.top - margin.bottom;
+  
+  // Create chart group
+  const g = svg.append('g')
+    .attr('transform', `translate(${margin.left}, ${margin.top})`);
+  
+  // Add title
+  g.append('text')
+    .attr('x', chartWidth / 2)
+    .attr('y', 0)
+    .attr('text-anchor', 'middle')
+    .style('font-size', '16px')
+    .style('font-weight', '600')
+    .style('fill', '#333')
+    .text('Graph Tagging Hierarchy');
+  
+  // Render the full hierarchical tree
+  renderFullHierarchy(g, chartWidth, chartHeight);
+}
+
+function renderChunkTags(g, width, height) {
+  const chunks = Object.values(graphTaggingData.chunks);
+  const nodeRadius = 25;
+  const spacing = 80;
+  
+  chunks.forEach((chunk, i) => {
+    const x = width / 2;
+    const y = 60 + i * spacing;
+    
+    // Draw chunk node
+    g.append('circle')
+      .attr('cx', x)
+      .attr('cy', y)
+      .attr('r', nodeRadius)
+      .attr('fill', chunk.color)
+      .attr('fill-opacity', 0.8)
+      .attr('stroke', '#333')
+      .attr('stroke-width', 2)
+      .attr('cursor', 'pointer')
+      .on('mouseover', (event) => showChunkTooltip(event, chunk))
+      .on('mouseout', hideTooltip);
+    
+    // Add chunk name
+    g.append('text')
+      .attr('x', x)
+      .attr('y', y + 5)
+      .attr('text-anchor', 'middle')
+      .style('font-size', '12px')
+      .style('font-weight', '600')
+      .style('fill', '#fff')
+      .text(chunk.name.split(' ')[0])
+      .attr('pointer-events', 'none');
+    
+    // Add tag count
+    g.append('text')
+      .attr('x', x)
+      .attr('y', y + 20)
+      .attr('text-anchor', 'middle')
+      .style('font-size', '10px')
+      .style('fill', '#fff')
+      .text(`${chunk.tags.length} tags`)
+      .attr('pointer-events', 'none');
+  });
+  
+  // Add instruction text
+  g.append('text')
+    .attr('x', width / 2)
+    .attr('y', height - 20)
+    .attr('text-anchor', 'middle')
+    .style('font-size', '14px')
+    .style('fill', '#666')
+    .text('Hover over nodes to see extracted tags');
+}
+
+function renderMetaTags(g, width, height, level) {
+  const metaTags = graphTaggingData.metaTags[level];
+  const nodeRadius = 30;
+  const spacing = 100;
+  
+  metaTags.forEach((meta, i) => {
+    const x = width / 2;
+    const y = 60 + i * spacing;
+    
+    // Draw meta tag node
+    g.append('circle')
+      .attr('cx', x)
+      .attr('cy', y)
+      .attr('r', nodeRadius)
+      .attr('fill', meta.color)
+      .attr('fill-opacity', 0.8)
+      .attr('stroke', '#333')
+      .attr('stroke-width', 2)
+      .attr('cursor', 'pointer')
+      .on('mouseover', (event) => showMetaTooltip(event, meta))
+      .on('mouseout', hideTooltip);
+    
+    // Add meta tag name
+    g.append('text')
+      .attr('x', x)
+      .attr('y', y + 5)
+      .attr('text-anchor', 'middle')
+      .style('font-size', '11px')
+      .style('font-weight', '600')
+      .style('fill', '#fff')
+      .text(meta.name.split(' ')[0])
+      .attr('pointer-events', 'none');
+    
+    // Add tag count
+    g.append('text')
+      .attr('x', x)
+      .attr('y', y + 18)
+      .attr('text-anchor', 'middle')
+      .style('font-size', '10px')
+      .style('fill', '#fff')
+      .text(`${meta.tags.length} tags`)
+      .attr('pointer-events', 'none');
+    
+    // Add children count
+    g.append('text')
+      .attr('x', x)
+      .attr('y', y + 30)
+      .attr('text-anchor', 'middle')
+      .style('font-size', '9px')
+      .style('fill', '#fff')
+      .text(`${meta.children.length} children`)
+      .attr('pointer-events', 'none');
+  });
+  
+  // Add level indicator
+  g.append('text')
+    .attr('x', width / 2)
+    .attr('y', height - 20)
+    .attr('text-anchor', 'middle')
+    .style('font-size', '14px')
+    .style('fill', '#666')
+    .text(`Meta Tags Level ${level === 'level1' ? '1' : '2'}`);
+}
+
+function showChunkTooltip(event, chunk) {
+  hideTooltip();
+  const tooltip = d3.select('body').append('div')
+    .attr('class', 'tooltip')
+    .style('position', 'absolute')
+    .style('background', 'rgba(0,0,0,0.92)')
+    .style('color', 'white')
+    .style('padding', '12px 16px')
+    .style('border-radius', '6px')
+    .style('font-size', '13px')
+    .style('pointer-events', 'none')
+    .style('z-index', 1000)
+    .style('box-shadow', '0 2px 8px rgba(0,0,0,0.3)')
+    .style('max-width', '300px');
+  
+  let tooltipContent = `<div style="margin-bottom: 8px;"><strong>${chunk.name}</strong></div>`;
+  tooltipContent += '<div style="margin-bottom: 6px;"><strong>Extracted Tags:</strong></div>';
+  
+  chunk.tags.forEach(tag => {
+    tooltipContent += `<div style="margin: 2px 0; padding: 2px 0; border-bottom: 1px solid #444;">`;
+    tooltipContent += `<span style="color: #90caf9;">${tag.type}:</span> ${tag.value}`;
+    tooltipContent += `<div style="font-size: 11px; color: #b3e5fc; font-style: italic; margin-top: 2px;">${tag.description}</div>`;
+    tooltipContent += `</div>`;
+  });
+  
+  tooltip.html(tooltipContent)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 10) + 'px');
+}
+
+function showMetaTooltip(event, meta) {
+  hideTooltip();
+  const tooltip = d3.select('body').append('div')
+    .attr('class', 'tooltip')
+    .style('position', 'absolute')
+    .style('background', 'rgba(0,0,0,0.92)')
+    .style('color', 'white')
+    .style('padding', '12px 16px')
+    .style('border-radius', '6px')
+    .style('font-size', '13px')
+    .style('pointer-events', 'none')
+    .style('z-index', 1000)
+    .style('box-shadow', '0 2px 8px rgba(0,0,0,0.3)')
+    .style('max-width', '300px');
+  
+  let tooltipContent = `<div style="margin-bottom: 8px;"><strong>${meta.name}</strong></div>`;
+  tooltipContent += `<div style="margin-bottom: 4px; color: #90caf9;">Meta Tags (${meta.tags.length})</div>`;
+  
+  meta.tags.forEach(tag => {
+    tooltipContent += `<div style="margin: 2px 0; padding: 2px 0; border-bottom: 1px solid #444;">`;
+    tooltipContent += `<span style="color: #90caf9;">${tag.type}:</span> ${tag.value}`;
+    tooltipContent += `<div style="font-size: 11px; color: #b3e5fc; font-style: italic; margin-top: 2px;">${tag.description}</div>`;
+    tooltipContent += `</div>`;
+  });
+  
+  tooltipContent += `<div style="margin-top: 8px; color: #f48fb1;">Children: ${meta.children.join(', ')}</div>`;
+  
+  tooltip.html(tooltipContent)
+    .style('left', (event.pageX + 12) + 'px')
+    .style('top', (event.pageY - 10) + 'px');
+}
+
+function renderFullHierarchy(g, width, height) {
+  const nodeRadius = 20;
+  const levelSpacing = 80;
+  const nodeSpacing = 120;
+  
+  // Level 2 (Top) - Medical Therapeutics
+  const level2Meta = graphTaggingData.metaTags.level2[0];
+  const level2X = width / 2;
+  const level2Y = 60;
+  
+  // Draw level 2 node
+  g.append('circle')
+    .attr('cx', level2X)
+    .attr('cy', level2Y)
+    .attr('r', nodeRadius)
+    .attr('fill', level2Meta.color)
+    .attr('fill-opacity', 0.8)
+    .attr('stroke', '#333')
+    .attr('stroke-width', 2)
+    .attr('cursor', 'pointer')
+    .on('mouseover', (event) => showMetaTooltip(event, level2Meta))
+    .on('mouseout', hideTooltip);
+  
+  // Add level 2 label (acronym)
+  g.append('text')
+    .attr('x', level2X)
+    .attr('y', level2Y + 5)
+    .attr('text-anchor', 'middle')
+    .style('font-size', '12px')
+    .style('font-weight', '600')
+    .style('fill', '#fff')
+    .text('MT')
+    .attr('pointer-events', 'none');
+  
+  // Level 1 (Middle) - Meta tags
+  const level1Metas = graphTaggingData.metaTags.level1;
+  level1Metas.forEach((meta, i) => {
+    const level1X = width / 2 + (i === 0 ? -nodeSpacing/2 : nodeSpacing/2);
+    const level1Y = level2Y + levelSpacing;
+    
+    // Draw level 1 node
+    g.append('circle')
+      .attr('cx', level1X)
+      .attr('cy', level1Y)
+      .attr('r', nodeRadius)
+      .attr('fill', meta.color)
+      .attr('fill-opacity', 0.8)
+      .attr('stroke', '#333')
+      .attr('stroke-width', 2)
+      .attr('cursor', 'pointer')
+      .on('mouseover', (event) => showMetaTooltip(event, meta))
+      .on('mouseout', hideTooltip);
+    
+    // Add level 1 label (acronym)
+    g.append('text')
+      .attr('x', level1X)
+      .attr('y', level1Y + 5)
+      .attr('text-anchor', 'middle')
+      .style('font-size', '12px')
+      .style('font-weight', '600')
+      .style('fill', '#fff')
+      .text(getAcronym(meta))
+      .attr('pointer-events', 'none');
+    
+    // Draw connection line from level 2 to level 1
+    g.append('line')
+      .attr('x1', level2X)
+      .attr('y1', level2Y + nodeRadius)
+      .attr('x2', level1X)
+      .attr('y2', level1Y - nodeRadius)
+      .attr('stroke', '#666')
+      .attr('stroke-width', 2)
+      .attr('stroke-dasharray', '3 2');
+  });
+  
+  // Level 0 (Bottom) - Chunks
+  const chunks = Object.values(graphTaggingData.chunks);
+  chunks.forEach((chunk, i) => {
+    const chunkX = width / 2 + (i === 0 ? -nodeSpacing/2 : nodeSpacing/2);
+    const chunkY = level2Y + 2 * levelSpacing;
+    
+    // Draw chunk node
+    g.append('circle')
+      .attr('cx', chunkX)
+      .attr('cy', chunkY)
+      .attr('r', nodeRadius)
+      .attr('fill', chunk.color)
+      .attr('fill-opacity', 0.8)
+      .attr('stroke', '#333')
+      .attr('stroke-width', 2)
+      .attr('cursor', 'pointer')
+      .on('mouseover', (event) => showChunkTooltip(event, chunk))
+      .on('mouseout', hideTooltip);
+    
+    // Add chunk label (acronym)
+    g.append('text')
+      .attr('x', chunkX)
+      .attr('y', chunkY + 5)
+      .attr('text-anchor', 'middle')
+      .style('font-size', '12px')
+      .style('font-weight', '600')
+      .style('fill', '#fff')
+      .text(getAcronym(chunk))
+      .attr('pointer-events', 'none');
+    
+    // Draw connection line from level 1 to chunk
+    const parentMeta = level1Metas[i];
+    const parentX = width / 2 + (i === 0 ? -nodeSpacing/2 : nodeSpacing/2);
+    const parentY = level2Y + levelSpacing;
+    
+    g.append('line')
+      .attr('x1', parentX)
+      .attr('y1', parentY + nodeRadius)
+      .attr('x2', chunkX)
+      .attr('y2', chunkY - nodeRadius)
+      .attr('stroke', '#666')
+      .attr('stroke-width', 2)
+      .attr('stroke-dasharray', '3 2');
+  });
+  
+  // Add level labels
+  g.append('text')
+    .attr('x', 10)
+    .attr('y', level2Y)
+    .style('font-size', '12px')
+    .style('font-weight', '600')
+    .style('fill', '#666')
+    .text('Level 2:');
+  
+  g.append('text')
+    .attr('x', 10)
+    .attr('y', level2Y + levelSpacing)
+    .style('font-size', '12px')
+    .style('font-weight', '600')
+    .style('fill', '#666')
+    .text('Level 1:');
+  
+  g.append('text')
+    .attr('x', 10)
+    .attr('y', level2Y + 2 * levelSpacing)
+    .style('font-size', '12px')
+    .style('font-weight', '600')
+    .style('fill', '#666')
+    .text('Chunks:');
+  
+  // Add instruction text
+  g.append('text')
+    .attr('x', width / 2)
+    .attr('y', height - 10)
+    .attr('text-anchor', 'middle')
+    .style('font-size', '12px')
+    .style('fill', '#666')
+    .text('Hover over nodes to see extracted tags');
+}
+
+function setupGraphTaggingControls() {
+  // No controls needed for full hierarchy view
+  const controls = d3.select('#tag-graph-controls');
+  controls.html('');
 }
