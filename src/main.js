@@ -1805,10 +1805,8 @@ function showNodeTooltip(event, d) {
     .style('top', (event.pageY - 10) + 'px');
 }
 
-function showEdgeTooltip(event, d) {
+function showEdgeTooltip(event, link, src, tgt) {
   hideTooltip();
-  const src = entityExtractionData.nodes.find(n => n.id === d.source);
-  const tgt = entityExtractionData.nodes.find(n => n.id === d.target);
   const tooltip = d3.select('body').append('div')
     .attr('class', 'tooltip')
     .style('position', 'absolute')
@@ -1821,8 +1819,9 @@ function showEdgeTooltip(event, d) {
     .style('z-index', 1000)
     .style('box-shadow', '0 2px 8px rgba(0,0,0,0.3)');
   tooltip.html(`
-    <strong>${d.label}</strong><br/>
-    <span style='color:#90caf9'>${src ? src.label : d.source}</span> → <span style='color:#f48fb1'>${tgt ? tgt.label : d.target}</span>
+    <div><strong>Relationship:</strong> ${link.label || ''}</div>
+    <div><strong>Source:</strong> ${(src && (src.name || src.label)) || ''}</div>
+    <div><strong>Target:</strong> ${(tgt && (tgt.name || tgt.label)) || ''}</div>
   `)
     .style('left', (event.pageX + 12) + 'px')
     .style('top', (event.pageY - 10) + 'px');
@@ -1947,9 +1946,73 @@ const overallGraphData = {
       label: 'EHR Data',
       color: '#ff7043',
       y: 120,
-      nodes: [
-        { id: 'ehr1', name: 'Patient A', type: 'EHR', meta: { timestamp: '2024-06-01', event: 'Admission' } },
-        { id: 'ehr2', name: 'Patient B', type: 'EHR', meta: { timestamp: '2024-06-02', event: 'Lab Result' } }
+      patients: [
+        {
+          id: 'Patient-001',
+          nodes: [
+            { id: 'p1', label: 'Patient-001', type: 'patient', age: 58, sex: 'F' },
+            { id: 'p1-diabetes', label: 'Type 2 Diabetes', type: 'diagnosis' },
+            { id: 'p1-hypertension', label: 'Hypertension', type: 'diagnosis' },
+            { id: 'p1-metformin', label: 'Metformin', type: 'medication' },
+            { id: 'p1-lisinopril', label: 'Lisinopril', type: 'medication' },
+            { id: 'p1-hba1c', label: 'HbA1c: 8.2%', type: 'lab' },
+            { id: 'p1-creatinine', label: 'Creatinine: 1.1', type: 'lab' },
+            { id: 'p1-admission', label: 'Admission 2024-05-01', type: 'encounter', date: '2024-05-01' }
+          ],
+          links: [
+            { source: 'p1', target: 'p1-diabetes', label: 'has diagnosis' },
+            { source: 'p1', target: 'p1-hypertension', label: 'has diagnosis' },
+            { source: 'p1', target: 'p1-metformin', label: 'prescribed' },
+            { source: 'p1', target: 'p1-lisinopril', label: 'prescribed' },
+            { source: 'p1', target: 'p1-hba1c', label: 'lab result' },
+            { source: 'p1', target: 'p1-creatinine', label: 'lab result' },
+            { source: 'p1', target: 'p1-admission', label: 'had encounter' }
+          ]
+        },
+        {
+          id: 'Patient-002',
+          nodes: [
+            { id: 'p2', label: 'Patient-002', type: 'patient', age: 67, sex: 'M' },
+            { id: 'p2-chf', label: 'Congestive Heart Failure', type: 'diagnosis' },
+            { id: 'p2-afib', label: 'Atrial Fibrillation', type: 'diagnosis' },
+            { id: 'p2-warfarin', label: 'Warfarin', type: 'medication' },
+            { id: 'p2-furosemide', label: 'Furosemide', type: 'medication' },
+            { id: 'p2-inr', label: 'INR: 2.5', type: 'lab' },
+            { id: 'p2-bnp', label: 'BNP: 350', type: 'lab' },
+            { id: 'p2-followup', label: 'Follow-up 2024-06-10', type: 'encounter', date: '2024-06-10' }
+          ],
+          links: [
+            { source: 'p2', target: 'p2-chf', label: 'has diagnosis' },
+            { source: 'p2', target: 'p2-afib', label: 'has diagnosis' },
+            { source: 'p2', target: 'p2-warfarin', label: 'prescribed' },
+            { source: 'p2', target: 'p2-furosemide', label: 'prescribed' },
+            { source: 'p2', target: 'p2-inr', label: 'lab result' },
+            { source: 'p2', target: 'p2-bnp', label: 'lab result' },
+            { source: 'p2', target: 'p2-followup', label: 'had encounter' }
+          ]
+        },
+        {
+          id: 'Patient-003',
+          nodes: [
+            { id: 'p3', label: 'Patient-003', type: 'patient', age: 45, sex: 'F' },
+            { id: 'p3-asthma', label: 'Asthma', type: 'diagnosis' },
+            { id: 'p3-obesity', label: 'Obesity', type: 'diagnosis' },
+            { id: 'p3-albuterol', label: 'Albuterol', type: 'medication' },
+            { id: 'p3-fluticasone', label: 'Fluticasone', type: 'medication' },
+            { id: 'p3-fev1', label: 'FEV1: 1.8L', type: 'lab' },
+            { id: 'p3-bmi', label: 'BMI: 34', type: 'lab' },
+            { id: 'p3-er', label: 'ER Visit 2024-04-15', type: 'encounter', date: '2024-04-15' }
+          ],
+          links: [
+            { source: 'p3', target: 'p3-asthma', label: 'has diagnosis' },
+            { source: 'p3', target: 'p3-obesity', label: 'has diagnosis' },
+            { source: 'p3', target: 'p3-albuterol', label: 'prescribed' },
+            { source: 'p3', target: 'p3-fluticasone', label: 'prescribed' },
+            { source: 'p3', target: 'p3-fev1', label: 'lab result' },
+            { source: 'p3', target: 'p3-bmi', label: 'lab result' },
+            { source: 'p3', target: 'p3-er', label: 'had encounter' }
+          ]
+        }
       ]
     },
     {
@@ -1957,9 +2020,49 @@ const overallGraphData = {
       label: 'Med Books & Papers',
       color: '#42a5f5',
       y: 300,
-      nodes: [
-        { id: 'paper1', name: 'COVID-19 Treatment', type: 'Paper', meta: { authors: 'Smith et al.', year: 2021 } },
-        { id: 'paper2', name: 'Steroids in ARDS', type: 'Book', meta: { authors: 'Lee et al.', year: 2020 } }
+      papers: [
+        {
+          id: 'Paper-001',
+          nodes: [
+            { id: 'paper1', label: 'Metformin for Type 2 Diabetes', type: 'paper', context: 'A randomized controlled trial evaluating the efficacy of metformin in glycemic control for adults with type 2 diabetes.' },
+            { id: 'paper1-diabetes', label: 'Type 2 Diabetes', type: 'topic', context: 'Primary disease focus of the study.' },
+            { id: 'paper1-metformin', label: 'Metformin', type: 'intervention', context: 'Drug intervention studied.' },
+            { id: 'paper1-hba1c', label: 'HbA1c', type: 'outcome', context: 'Primary outcome measure: change in HbA1c.' }
+          ],
+          links: [
+            { source: 'paper1', target: 'paper1-diabetes', label: 'studies' },
+            { source: 'paper1', target: 'paper1-metformin', label: 'intervention' },
+            { source: 'paper1', target: 'paper1-hba1c', label: 'measures' }
+          ]
+        },
+        {
+          id: 'Paper-002',
+          nodes: [
+            { id: 'paper2', label: 'Heart Failure Management Guidelines', type: 'guideline', context: '2022 clinical practice guideline for the diagnosis and management of heart failure.' },
+            { id: 'paper2-chf', label: 'Congestive Heart Failure', type: 'topic', context: 'Main disease addressed.' },
+            { id: 'paper2-bnp', label: 'BNP', type: 'biomarker', context: 'BNP as a diagnostic and prognostic biomarker.' },
+            { id: 'paper2-furosemide', label: 'Furosemide', type: 'treatment', context: 'Loop diuretic recommended for symptom relief.' }
+          ],
+          links: [
+            { source: 'paper2', target: 'paper2-chf', label: 'addresses' },
+            { source: 'paper2', target: 'paper2-bnp', label: 'discusses' },
+            { source: 'paper2', target: 'paper2-furosemide', label: 'recommends' }
+          ]
+        },
+        {
+          id: 'Paper-003',
+          nodes: [
+            { id: 'paper3', label: 'Asthma and Obesity: A Review', type: 'review', context: 'A systematic review of the relationship between obesity and asthma severity in adults.' },
+            { id: 'paper3-asthma', label: 'Asthma', type: 'topic', context: 'Primary disease focus.' },
+            { id: 'paper3-obesity', label: 'Obesity', type: 'risk factor', context: 'Risk factor for increased asthma severity.' },
+            { id: 'paper3-fev1', label: 'FEV1', type: 'outcome', context: 'Lung function outcome.' }
+          ],
+          links: [
+            { source: 'paper3', target: 'paper3-asthma', label: 'reviews' },
+            { source: 'paper3', target: 'paper3-obesity', label: 'analyzes' },
+            { source: 'paper3', target: 'paper3-fev1', label: 'measures' }
+          ]
+        }
       ]
     },
     {
@@ -1967,19 +2070,71 @@ const overallGraphData = {
       label: 'Med Vocabularies',
       color: '#66bb6a',
       y: 480,
-      nodes: [
-        { id: 'dict1', name: 'Glucocorticoids', type: 'Definition', meta: { definition: 'A group of corticosteroids...' } },
-        { id: 'dict2', name: 'Remdesivir', type: 'Definition', meta: { definition: 'An antiviral medication...' } }
+      entries: [
+        {
+          id: 'umls-metformin',
+          name: 'Metformin',
+          type: 'drug',
+          context: 'A biguanide oral antihyperglycemic agent used for the management of type 2 diabetes mellitus.'
+        },
+        {
+          id: 'umls-bnp',
+          name: 'BNP',
+          type: 'biomarker',
+          context: 'B-type natriuretic peptide, a cardiac neurohormone used as a biomarker for heart failure.'
+        },
+        {
+          id: 'umls-fev1',
+          name: 'FEV1',
+          type: 'measurement',
+          context: 'Forced expiratory volume in 1 second, a measure of lung function.'
+        },
+        {
+          id: 'umls-furosemide',
+          name: 'Furosemide',
+          type: 'drug',
+          context: 'A loop diuretic used to treat fluid build-up due to heart failure, liver scarring, or kidney disease.'
+        },
+        {
+          id: 'umls-hba1c',
+          name: 'HbA1c',
+          type: 'lab',
+          context: 'Glycated hemoglobin, a measure of average blood glucose over the past 2-3 months.'
+        },
+        {
+          id: 'umls-asthma',
+          name: 'Asthma',
+          type: 'disease',
+          context: 'A chronic inflammatory disease of the airways characterized by variable and recurring symptoms.'
+        },
+        {
+          id: 'umls-obesity',
+          name: 'Obesity',
+          type: 'disease',
+          context: 'A condition characterized by excessive body fat that increases the risk of health problems.'
+        }
       ]
     }
   ],
   edges: [
     // EHR to Papers
-    { source: 'ehr1', target: 'paper1' },
-    { source: 'ehr2', target: 'paper2' },
+    { source: 'p1-diabetes', target: 'paper1-diabetes' },
+    { source: 'p1-metformin', target: 'paper1-metformin' },
+    { source: 'p1-hba1c', target: 'paper1-hba1c' },
+    { source: 'p2-chf', target: 'paper2-chf' },
+    { source: 'p2-bnp', target: 'paper2-bnp' },
+    { source: 'p2-furosemide', target: 'paper2-furosemide' },
+    { source: 'p3-asthma', target: 'paper3-asthma' },
+    { source: 'p3-obesity', target: 'paper3-obesity' },
+    { source: 'p3-fev1', target: 'paper3-fev1' },
     // Papers to Dictionary
-    { source: 'paper1', target: 'dict2' },
-    { source: 'paper2', target: 'dict1' }
+    { source: 'paper1-metformin', target: 'umls-metformin' },
+    { source: 'paper1-hba1c', target: 'umls-hba1c' },
+    { source: 'paper2-bnp', target: 'umls-bnp' },
+    { source: 'paper2-furosemide', target: 'umls-furosemide' },
+    { source: 'paper3-fev1', target: 'umls-fev1' },
+    { source: 'paper3-asthma', target: 'umls-asthma' },
+    { source: 'paper3-obesity', target: 'umls-obesity' }
   ]
 };
 
@@ -1992,76 +2147,217 @@ function renderOverallGraphStructure() {
   const svg = d3.select('#overall-graph-svg');
   svg.selectAll('*').remove();
 
-  // Draw planes
-  overallGraphData.layers.forEach(layer => {
-    // Plane
-    svg.append('rect')
+  // Draw planes and add interactivity
+  overallGraphData.layers.forEach((layer, layerIdx) => {
+    // Increase height of bounding box for more space
+    const plane = svg.append('rect')
       .attr('x', 60)
-      .attr('y', layer.y - 30)
+      .attr('y', layer.y - 60)
       .attr('width', 680)
-      .attr('height', 80)
+      .attr('height', 120)
       .attr('rx', 28)
       .attr('fill', layer.color)
       .attr('fill-opacity', 0.13)
       .attr('stroke', layer.color)
       .attr('stroke-width', 2)
+      .attr('class', 'layer-plane')
       .attr('cursor', 'pointer')
+      .on('mouseover', function() {
+        // Dim other layers' planes, nodes, and labels
+        svg.selectAll('.layer-plane').attr('fill-opacity', (d, i) => i === layerIdx ? 0.18 : 0.05)
+          .attr('stroke-opacity', (d, i) => i === layerIdx ? 1 : 0.15);
+        svg.selectAll('.layer-group').attr('opacity', (d, i) => i === layerIdx ? 1 : 0.18);
+        svg.selectAll('.layer-label').attr('opacity', (d, i) => i === layerIdx ? 1 : 0.18);
+      })
+      .on('mouseout', function() {
+        // Restore all layers
+        svg.selectAll('.layer-plane').attr('fill-opacity', 0.13).attr('stroke-opacity', 1);
+        svg.selectAll('.layer-group').attr('opacity', 1);
+        svg.selectAll('.layer-label').attr('opacity', 1);
+      })
       .on('click', () => zoomToLayer(layer.id));
 
-    // Label
     svg.append('text')
       .attr('x', 400)
-      .attr('y', layer.y - 40)
+      .attr('y', layer.y - 80)
       .attr('text-anchor', 'middle')
       .attr('font-size', 22)
       .attr('font-weight', 700)
       .attr('fill', layer.color)
+      .attr('class', 'layer-label')
       .text(layer.label)
       .attr('pointer-events', 'none');
   });
 
-  // Draw nodes on planes
-  overallGraphData.layers.forEach(layer => {
-    const nodeSpacing = 220;
-    layer.nodes.forEach((node, i) => {
-      const x = 200 + i * nodeSpacing;
-      svg.append('ellipse')
-        .attr('cx', x)
-        .attr('cy', layer.y)
-        .attr('rx', 44)
-        .attr('ry', 28)
-        .attr('fill', layer.color)
+  // --- Render EHR patient subgraphs (small, no labels, circles) ---
+  const ehrLayer = overallGraphData.layers[0];
+  const ehrGroup = svg.append('g').attr('class', 'layer-group');
+  ehrLayer.patients.forEach((patient, i) => {
+    const xOffset = 180 + i * 220;
+    const layoutRadius = 28;
+    const nodeRadius = 10;
+    patient.nodes.forEach((node, j) => {
+      const angle = (j / patient.nodes.length) * 2 * Math.PI;
+      const cx = xOffset + Math.cos(angle) * layoutRadius;
+      const cy = ehrLayer.y + Math.sin(angle) * layoutRadius;
+      ehrGroup.append('circle')
+        .attr('cx', cx)
+        .attr('cy', cy)
+        .attr('r', nodeRadius)
+        .attr('fill', ehrLayer.color)
         .attr('fill-opacity', 0.85)
         .attr('stroke', '#333')
-        .attr('stroke-width', 2)
+        .attr('stroke-width', 1.5)
         .attr('cursor', 'pointer')
-        .on('mouseover', (event) => showOverallNodeTooltip(event, node, layer))
+        .on('mouseover', (event) => showLayerNodeTooltip(event, node))
         .on('mouseout', hideTooltip);
-      svg.append('text')
-        .attr('x', x)
-        .attr('y', layer.y + 6)
-        .attr('text-anchor', 'middle')
-        .attr('font-size', 16)
-        .attr('font-weight', 600)
-        .attr('fill', '#fff')
-        .text(node.name)
-        .attr('pointer-events', 'none');
+      // No label in overview
+    });
+    // Draw patient subgraph edges (thin, faint)
+    patient.links.forEach(link => {
+      const src = patient.nodes.find(n => n.id === link.source);
+      const tgt = patient.nodes.find(n => n.id === link.target);
+      if (src && tgt) {
+        const srcIdx = patient.nodes.indexOf(src);
+        const tgtIdx = patient.nodes.indexOf(tgt);
+        const srcAngle = (srcIdx / patient.nodes.length) * 2 * Math.PI;
+        const tgtAngle = (tgtIdx / patient.nodes.length) * 2 * Math.PI;
+        const srcX = xOffset + Math.cos(srcAngle) * layoutRadius;
+        const srcY = ehrLayer.y + Math.sin(srcAngle) * layoutRadius;
+        const tgtX = xOffset + Math.cos(tgtAngle) * layoutRadius;
+        const tgtY = ehrLayer.y + Math.sin(tgtAngle) * layoutRadius;
+        ehrGroup.insert('line', ':first-child')
+          .attr('x1', srcX)
+          .attr('y1', srcY)
+          .attr('x2', tgtX)
+          .attr('y2', tgtY)
+          .attr('stroke', '#888')
+          .attr('stroke-width', 1)
+          .attr('stroke-dasharray', '2 2')
+          .attr('opacity', 0.5);
+      }
     });
   });
 
-  // Draw edges between layers
+  // --- Render Papers subgraphs (small, no labels, circles) ---
+  const papersLayer = overallGraphData.layers[1];
+  const papersGroup = svg.append('g').attr('class', 'layer-group');
+  papersLayer.papers.forEach((paper, i) => {
+    const xOffset = 180 + i * 220;
+    const layoutRadius = 28;
+    const nodeRadius = 10;
+    paper.nodes.forEach((node, j) => {
+      const angle = (j / paper.nodes.length) * 2 * Math.PI;
+      const cx = xOffset + Math.cos(angle) * layoutRadius;
+      const cy = papersLayer.y + Math.sin(angle) * layoutRadius;
+      papersGroup.append('circle')
+        .attr('cx', cx)
+        .attr('cy', cy)
+        .attr('r', nodeRadius)
+        .attr('fill', papersLayer.color)
+        .attr('fill-opacity', 0.85)
+        .attr('stroke', '#333')
+        .attr('stroke-width', 1.5)
+        .attr('cursor', 'pointer')
+        .on('mouseover', (event) => showLayerNodeTooltip(event, node))
+        .on('mouseout', hideTooltip);
+      // No label in overview
+    });
+    // Draw paper subgraph edges (thin, faint)
+    paper.links.forEach(link => {
+      const src = paper.nodes.find(n => n.id === link.source);
+      const tgt = paper.nodes.find(n => n.id === link.target);
+      if (src && tgt) {
+        const srcIdx = paper.nodes.indexOf(src);
+        const tgtIdx = paper.nodes.indexOf(tgt);
+        const srcAngle = (srcIdx / paper.nodes.length) * 2 * Math.PI;
+        const tgtAngle = (tgtIdx / paper.nodes.length) * 2 * Math.PI;
+        const srcX = xOffset + Math.cos(srcAngle) * layoutRadius;
+        const srcY = papersLayer.y + Math.sin(srcAngle) * layoutRadius;
+        const tgtX = xOffset + Math.cos(tgtAngle) * layoutRadius;
+        const tgtY = papersLayer.y + Math.sin(tgtAngle) * layoutRadius;
+        papersGroup.insert('line', ':first-child')
+          .attr('x1', srcX)
+          .attr('y1', srcY)
+          .attr('x2', tgtX)
+          .attr('y2', tgtY)
+          .attr('stroke', '#888')
+          .attr('stroke-width', 1)
+          .attr('stroke-dasharray', '2 2')
+          .attr('opacity', 0.5);
+      }
+    });
+  });
+
+  // --- Render Dictionary entries (small, no labels, circles) ---
+  const dictLayer = overallGraphData.layers[2];
+  const dictGroup = svg.append('g').attr('class', 'layer-group');
+  dictLayer.entries.forEach((entry, i) => {
+    const x = 120 + i * 90;
+    const y = dictLayer.y;
+    dictGroup.append('circle')
+      .attr('cx', x)
+      .attr('cy', y)
+      .attr('r', 10)
+      .attr('fill', dictLayer.color)
+      .attr('fill-opacity', 0.85)
+      .attr('stroke', '#333')
+      .attr('stroke-width', 1.5)
+      .attr('cursor', 'pointer')
+      .on('mouseover', (event) => showLayerNodeTooltip(event, entry))
+      .on('mouseout', hideTooltip);
+    // No label in overview
+  });
+
+  // --- Draw inter-layer edges ---
   overallGraphData.edges.forEach(edge => {
-    const src = findNodeById(edge.source);
-    const tgt = findNodeById(edge.target);
-    if (src && tgt) {
+    let srcX, srcY, tgtX, tgtY;
+    ehrLayer.patients.forEach((patient, i) => {
+      const xOffset = 180 + i * 220;
+      patient.nodes.forEach((node, j) => {
+        if (node.id === edge.source) {
+          const angle = (j / patient.nodes.length) * 2 * Math.PI;
+          srcX = xOffset + Math.cos(angle) * 28;
+          srcY = ehrLayer.y + Math.sin(angle) * 28;
+        }
+      });
+    });
+    papersLayer.papers.forEach((paper, i) => {
+      const xOffset = 180 + i * 220;
+      paper.nodes.forEach((node, j) => {
+        if (node.id === edge.target) {
+          const angle = (j / paper.nodes.length) * 2 * Math.PI;
+          tgtX = xOffset + Math.cos(angle) * 28;
+          tgtY = papersLayer.y + Math.sin(angle) * 28;
+        }
+        if (node.id === edge.source) {
+          const angle = (j / paper.nodes.length) * 2 * Math.PI;
+          srcX = xOffset + Math.cos(angle) * 28;
+          srcY = papersLayer.y + Math.sin(angle) * 28;
+        }
+      });
+    });
+    dictLayer.entries.forEach((entry, i) => {
+      const x = 120 + i * 90;
+      const y = dictLayer.y;
+      if (entry.id === edge.target) {
+        tgtX = x;
+        tgtY = y;
+      }
+      if (entry.id === edge.source) {
+        srcX = x;
+        srcY = y;
+      }
+    });
+    if (srcX !== undefined && srcY !== undefined && tgtX !== undefined && tgtY !== undefined) {
       svg.insert('line', ':first-child')
-        .attr('x1', getNodeX(src))
-        .attr('y1', getNodeY(src))
-        .attr('x2', getNodeX(tgt))
-        .attr('y2', getNodeY(tgt))
-        .attr('stroke', '#888')
-        .attr('stroke-width', 2)
-        .attr('stroke-dasharray', '6 4');
+        .attr('x1', srcX)
+        .attr('y1', srcY)
+        .attr('x2', tgtX)
+        .attr('y2', tgtY)
+        .attr('stroke', '#1976d2')
+        .attr('stroke-width', 1.5)
+        .attr('stroke-dasharray', '4 3');
     }
   });
 
@@ -2106,73 +2402,152 @@ function renderLayerSubgraph(layerId) {
     .attr('fill', layer.color)
     .text(layer.label);
 
-  // Draw nodes (spread horizontally)
-  const nodeSpacing = 320 / (layer.nodes.length + 1);
-  layer.nodes.forEach((node, i) => {
-    const x = 220 + (i + 1) * nodeSpacing * 2;
-    svg.append('ellipse')
-      .attr('cx', x)
-      .attr('cy', 300)
-      .attr('rx', 60)
-      .attr('ry', 38)
-      .attr('fill', layer.color)
-      .attr('fill-opacity', 0.92)
-      .attr('stroke', '#333')
-      .attr('stroke-width', 2)
-      .on('mouseover', (event) => showOverallNodeTooltip(event, node, layer))
-      .on('mouseout', hideTooltip);
-    svg.append('text')
-      .attr('x', x)
-      .attr('y', 308)
-      .attr('text-anchor', 'middle')
-      .attr('font-size', 20)
-      .attr('font-weight', 700)
-      .attr('fill', '#fff')
-      .text(node.name)
-      .attr('pointer-events', 'none');
-  });
-}
-
-function resetOverallGraphView() {
-  renderOverallGraphStructure();
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  const backBtn = document.getElementById('overall-graph-back');
-  if (backBtn) {
-    backBtn.onclick = resetOverallGraphView;
+  if (layerId === 'ehr') {
+    layer.patients.forEach((patient, i) => {
+      const xOffset = 220 + i * 220;
+      const layoutRadius = 48;
+      const nodeRadius = 16;
+      patient.nodes.forEach((node, j) => {
+        const angle = (j / patient.nodes.length) * 2 * Math.PI;
+        const cx = xOffset + Math.cos(angle) * layoutRadius;
+        const cy = 300 + Math.sin(angle) * layoutRadius;
+        svg.append('circle')
+          .attr('cx', cx)
+          .attr('cy', cy)
+          .attr('r', nodeRadius)
+          .attr('fill', layer.color)
+          .attr('fill-opacity', 0.92)
+          .attr('stroke', '#333')
+          .attr('stroke-width', 2)
+          .attr('cursor', 'pointer')
+          .on('mouseover', (event) => showLayerNodeTooltip(event, node))
+          .on('mouseout', hideTooltip);
+        // Acronym label
+        svg.append('text')
+          .attr('x', cx)
+          .attr('y', cy + 6)
+          .attr('text-anchor', 'middle')
+          .attr('font-size', 14)
+          .attr('font-weight', 700)
+          .attr('fill', '#fff')
+          .text(getAcronym(node))
+          .attr('pointer-events', 'none');
+      });
+      patient.links.forEach(link => {
+        const src = patient.nodes.find(n => n.id === link.source);
+        const tgt = patient.nodes.find(n => n.id === link.target);
+        if (src && tgt) {
+          const srcIdx = patient.nodes.indexOf(src);
+          const tgtIdx = patient.nodes.indexOf(tgt);
+          const srcAngle = (srcIdx / patient.nodes.length) * 2 * Math.PI;
+          const tgtAngle = (tgtIdx / patient.nodes.length) * 2 * Math.PI;
+          const srcX = xOffset + Math.cos(srcAngle) * layoutRadius;
+          const srcY = 300 + Math.sin(srcAngle) * layoutRadius;
+          const tgtX = xOffset + Math.cos(tgtAngle) * layoutRadius;
+          const tgtY = 300 + Math.sin(tgtAngle) * layoutRadius;
+          svg.append('line')
+            .attr('x1', srcX)
+            .attr('y1', srcY)
+            .attr('x2', tgtX)
+            .attr('y2', tgtY)
+            .attr('stroke', '#888')
+            .attr('stroke-width', 2)
+            .attr('stroke-dasharray', '3 2')
+            .on('mouseover', (event) => showEdgeTooltip(event, link, src, tgt))
+            .on('mouseout', hideTooltip);
+        }
+      });
+    });
+  } else if (layerId === 'papers') {
+    layer.papers.forEach((paper, i) => {
+      const xOffset = 220 + i * 220;
+      const layoutRadius = 48;
+      const nodeRadius = 16;
+      paper.nodes.forEach((node, j) => {
+        const angle = (j / paper.nodes.length) * 2 * Math.PI;
+        const cx = xOffset + Math.cos(angle) * layoutRadius;
+        const cy = 300 + Math.sin(angle) * layoutRadius;
+        svg.append('circle')
+          .attr('cx', cx)
+          .attr('cy', cy)
+          .attr('r', nodeRadius)
+          .attr('fill', layer.color)
+          .attr('fill-opacity', 0.92)
+          .attr('stroke', '#333')
+          .attr('stroke-width', 2)
+          .attr('cursor', 'pointer')
+          .on('mouseover', (event) => showLayerNodeTooltip(event, node))
+          .on('mouseout', hideTooltip);
+        // Acronym label
+        svg.append('text')
+          .attr('x', cx)
+          .attr('y', cy + 6)
+          .attr('text-anchor', 'middle')
+          .attr('font-size', 14)
+          .attr('font-weight', 700)
+          .attr('fill', '#fff')
+          .text(getAcronym(node))
+          .attr('pointer-events', 'none');
+      });
+      paper.links.forEach(link => {
+        const src = paper.nodes.find(n => n.id === link.source);
+        const tgt = paper.nodes.find(n => n.id === link.target);
+        if (src && tgt) {
+          const srcIdx = paper.nodes.indexOf(src);
+          const tgtIdx = paper.nodes.indexOf(tgt);
+          const srcAngle = (srcIdx / paper.nodes.length) * 2 * Math.PI;
+          const tgtAngle = (tgtIdx / paper.nodes.length) * 2 * Math.PI;
+          const srcX = xOffset + Math.cos(srcAngle) * layoutRadius;
+          const srcY = 300 + Math.sin(srcAngle) * layoutRadius;
+          const tgtX = xOffset + Math.cos(tgtAngle) * layoutRadius;
+          const tgtY = 300 + Math.sin(tgtAngle) * layoutRadius;
+          svg.append('line')
+            .attr('x1', srcX)
+            .attr('y1', srcY)
+            .attr('x2', tgtX)
+            .attr('y2', tgtY)
+            .attr('stroke', '#888')
+            .attr('stroke-width', 2)
+            .attr('stroke-dasharray', '3 2')
+            .on('mouseover', (event) => showEdgeTooltip(event, link, src, tgt))
+            .on('mouseout', hideTooltip);
+        }
+      });
+    });
+  } else if (layerId === 'dict') {
+    layer.entries.forEach((entry, i) => {
+      const x = 180 + i * 90;
+      const y = 300;
+      svg.append('circle')
+        .attr('cx', x)
+        .attr('cy', y)
+        .attr('r', 14)
+        .attr('fill', layer.color)
+        .attr('fill-opacity', 0.92)
+        .attr('stroke', '#333')
+        .attr('stroke-width', 2)
+        .attr('cursor', 'pointer')
+        .on('mouseover', (event) => showLayerNodeTooltip(event, entry))
+        .on('mouseout', hideTooltip);
+      // Acronym label
+      svg.append('text')
+        .attr('x', x)
+        .attr('y', y + 6)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', 14)
+        .attr('font-weight', 700)
+        .attr('fill', '#fff')
+        .text(getAcronym(entry))
+        .attr('pointer-events', 'none');
+    });
   }
-});
-
-function findNodeById(id) {
-  for (const layer of overallGraphData.layers) {
-    for (const node of layer.nodes) {
-      if (node.id === id) return node;
-    }
-  }
-  return null;
-}
-function getNodeX(node) {
-  // Use same logic as in renderOverallGraphStructure
-  const layer = overallGraphData.layers.find(l => l.nodes.some(n => n.id === node.id));
-  const i = layer.nodes.findIndex(n => n.id === node.id);
-  return 200 + i * 220;
-}
-function getNodeY(node) {
-  const layer = overallGraphData.layers.find(l => l.nodes.some(n => n.id === node.id));
-  return layer.y;
 }
 
-function showOverallNodeTooltip(event, node, layer) {
+function showLayerNodeTooltip(event, node) {
   hideTooltip();
-  let metaHtml = '';
-  if (layer.id === 'ehr') {
-    metaHtml = `<div><strong>Timestamp:</strong> ${node.meta.timestamp}</div><div><strong>Event:</strong> ${node.meta.event}</div>`;
-  } else if (layer.id === 'papers') {
-    metaHtml = `<div><strong>Authors:</strong> ${node.meta.authors}</div><div><strong>Year:</strong> ${node.meta.year}</div>`;
-  } else if (layer.id === 'dict') {
-    metaHtml = `<div><strong>Definition:</strong> <span style='font-style:italic;'>${node.meta.definition}</span></div>`;
-  }
+  let name = node.name || node.label;
+  let type = node.type;
+  let context = node.context || (node.meta && node.meta.definition) || '';
   const tooltip = d3.select('body').append('div')
     .attr('class', 'tooltip')
     .style('position', 'absolute')
@@ -2185,9 +2560,9 @@ function showOverallNodeTooltip(event, node, layer) {
     .style('z-index', 1000)
     .style('box-shadow', '0 2px 8px rgba(0,0,0,0.3)');
   tooltip.html(`
-    <div><strong>Name:</strong> ${node.name}</div>
-    <div><strong>Type:</strong> ${node.type}</div>
-    ${metaHtml}
+    <div><strong>Name:</strong> ${name}</div>
+    <div><strong>Type:</strong> ${type}</div>
+    <div style="margin-top: 6px;"><strong>Context:</strong><br/><span style="font-style: italic; color: #b3e5fc;">${context}</span></div>
   `)
     .style('left', (event.pageX + 12) + 'px')
     .style('top', (event.pageY - 10) + 'px');
@@ -2211,3 +2586,14 @@ function showSection(sectionId) {
 
 // Example: Hook up to navigation (replace with your actual navigation logic)
 // showSection('overall-graph-structure'); // Uncomment to test directly
+
+function getAcronym(node) {
+  if (node.acronym) return node.acronym;
+  const label = node.name || node.label || '';
+  // Use first 3-4 uppercase letters or first letters of words
+  const words = label.split(/\s+/);
+  if (words.length === 1) {
+    return label.slice(0, 4).toUpperCase();
+  }
+  return words.map(w => w[0]).join('').toUpperCase().slice(0, 4);
+}
